@@ -17,8 +17,8 @@ use super::{
 
 const OFFSET: Vec3 = Vec3::new(0.0, -10.0, 0.0);
 const CHAIN_COOLDOWN: f32 = 0.5;
-const CHAIN_STRIKE_COOLDOWN: f32 = 0.25;
-const STRIKE_COOLDOWN: f32 = 0.5;
+const CHAIN_STRIKE_COOLDOWN: f32 = 0.15;
+const STRIKE_COOLDOWN: f32 = 0.2;
 
 #[derive(Resource, Default)]
 struct StrikeCooldown {
@@ -27,7 +27,7 @@ struct StrikeCooldown {
 }
 
 #[derive(Component)]
-struct Strike;
+pub struct Strike;
 
 #[derive(Event)]
 pub struct SpawnStrike {
@@ -53,10 +53,10 @@ fn spawn_strikes(
         let collider = commands
             .spawn((
                 Sensor,
-                Collider::ball(4.0),
+                Collider::ball(30.0),
                 CollisionGroups::default(),
                 TransformBundle::from_transform(Transform::from_translation(Vec3::new(
-                    0.0, -5.0, 0.0,
+                    15.0, 0.0, 0.0,
                 ))),
             ))
             .id();
@@ -114,13 +114,6 @@ fn trigger_strike(
     }
 
     let rot = quat_from_vec2(mouse_coords.0 - player_transform.translation.truncate());
-
-    if strike_cooldown.chain_cooldown.just_finished() {
-        strike_cooldown
-            .absolute_cooldown
-            .set_duration(Duration::from_secs_f32(STRIKE_COOLDOWN));
-        strike_cooldown.absolute_cooldown.reset();
-    }
 
     if player_input.attack {
         // This is the first strike

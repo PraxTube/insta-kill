@@ -1,3 +1,5 @@
+mod diagnostics;
+
 use bevy::prelude::*;
 use bevy_rapier2d::plugin::RapierTransformPropagateSet;
 
@@ -10,10 +12,12 @@ pub struct UtilsPlugin;
 
 impl Plugin for UtilsPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<DebugMode>().add_systems(
-            PostUpdate,
-            reset_rotations.before(RapierTransformPropagateSet),
-        );
+        app.add_plugins(diagnostics::DiagnosticsPlugin)
+            .init_resource::<DebugMode>()
+            .add_systems(
+                PostUpdate,
+                reset_rotations.before(RapierTransformPropagateSet),
+            );
     }
 }
 

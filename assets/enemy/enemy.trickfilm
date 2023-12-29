@@ -1,0 +1,12 @@
+[
+    (
+        name: "flying",
+        keyframes: KeyframesRange((start: 0, end: 6)),
+        duration: 0.5,
+    ),
+    (
+        name: "dying",
+        keyframes: KeyframesRange((start: 8, end: 16)),
+        duration: 0.9,
+    ),
+]

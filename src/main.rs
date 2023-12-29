@@ -1,6 +1,7 @@
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
 mod assets;
+mod enemy;
 mod player;
 mod utils;
 mod world;
@@ -57,7 +58,12 @@ fn main() {
         .configure_loading_state(
             LoadingStateConfig::new(GameState::AssetLoading).load_collection::<GameAssets>(),
         )
-        .add_plugins((world::WorldPlugin, utils::UtilsPlugin, player::PlayerPlugin))
+        .add_plugins((
+            world::WorldPlugin,
+            utils::UtilsPlugin,
+            player::PlayerPlugin,
+            enemy::EnemyPlugin,
+        ))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .run();
 }

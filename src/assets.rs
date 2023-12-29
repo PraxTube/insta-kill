@@ -25,6 +25,19 @@ pub struct GameAssets {
     #[asset(path = "player/player_shadow.png")]
     pub player_shadow: Handle<Image>,
 
+    // --- ENEMY ---
+    #[asset(texture_atlas(tile_size_x = 96.0, tile_size_y = 80.0, columns = 8, rows = 2))]
+    #[asset(path = "enemy/enemy.png")]
+    pub enemy: Handle<TextureAtlas>,
+    #[asset(
+        paths("enemy/enemy.trickfilm#flying", "enemy/enemy.trickfilm#dying",),
+        collection(typed)
+    )]
+    pub enemy_animations: Vec<Handle<AnimationClip2D>>,
+
+    #[asset(path = "enemy/enemy_shadow.png")]
+    pub enemy_shadow: Handle<Image>,
+
     // --- MAP ---
     #[asset(path = "map/level.ldtk")]
     pub level: Handle<LdtkProject>,

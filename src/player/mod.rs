@@ -1,9 +1,9 @@
 pub mod input;
 pub mod state;
+pub mod strike;
 
 mod movement;
 mod spawn;
-mod strike;
 
 use bevy::prelude::*;
 
