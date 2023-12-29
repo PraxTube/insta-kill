@@ -22,6 +22,9 @@ pub struct GameAssets {
     #[asset(paths("player/player_strike.trickfilm#main"), collection(typed))]
     pub player_strike_animations: Vec<Handle<AnimationClip2D>>,
 
+    #[asset(path = "player/player_shadow.png")]
+    pub player_shadow: Handle<Image>,
+
     // --- MAP ---
     #[asset(path = "map/level.ldtk")]
     pub level: Handle<LdtkProject>,

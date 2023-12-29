@@ -50,7 +50,7 @@ fn reset_rotations(
             );
 
             transform.rotation = rot;
-            transform.translation = transform.rotation.mul_vec3(fixed_rotation.offset);
+            transform.translation = rot_inv.mul_vec3(fixed_rotation.offset);
         }
     }
 }

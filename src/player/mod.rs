@@ -11,7 +11,7 @@ use state::PlayerState;
 
 pub const PLAYER_SPAWN_POS: Vec3 = Vec3::new(100.0, 100.0, 0.0);
 
-const MOVE_SPEED: f32 = 4000.0;
+const MOVE_SPEED: f32 = 400.0;
 
 pub struct PlayerPlugin;
 

@@ -11,7 +11,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 const BACKGROUND_ZINDEX_ABS: f32 = 1000.0;
-const CHUNK_SIZE: f32 = 32.0;
+const CHUNK_SIZE: f32 = 32.0 * 32.0;
 
 pub struct WorldPlugin;
 
