@@ -16,6 +16,7 @@ pub struct PlayerInput {
     pub zoom: f32,
     pub escape: bool,
     pub toggle_fullscreen: bool,
+    pub restart: bool,
 }
 
 fn reset_player_input(mut player_input: ResMut<PlayerInput>) {
@@ -133,6 +134,10 @@ fn toggle_fullscreen(
     player_input.toggle_fullscreen = pressed;
 }
 
+fn restart(keys: Res<Input<KeyCode>>, mut player_input: ResMut<PlayerInput>) {
+    player_input.restart = keys.just_pressed(KeyCode::R);
+}
+
 fn toggle_debug_mode(keys: Res<Input<KeyCode>>, mut debug_mode: ResMut<DebugMode>) {
     if keys.just_pressed(KeyCode::F1) {
         debug_mode.active = !debug_mode.active;
@@ -153,6 +158,7 @@ impl Plugin for InputPlugin {
                 attack,
                 input_escape,
                 toggle_fullscreen,
+                restart,
                 toggle_debug_mode,
             )
                 .after(InputSystem),

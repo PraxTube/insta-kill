@@ -127,7 +127,7 @@ impl Plugin for CameraPlugin {
                 zoom_camera,
             ),
         )
-        .add_systems(OnEnter(GameState::Gaming), spawn_camera)
+        .add_systems(OnExit(GameState::AssetLoading), spawn_camera)
         .add_systems(PostUpdate, update_camera_target.before(update_camera));
     }
 }

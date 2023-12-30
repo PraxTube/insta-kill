@@ -143,7 +143,7 @@ impl Plugin for MapPlugin {
                 ..default()
             })
             .add_systems(
-                OnEnter(GameState::Gaming),
+                OnExit(GameState::AssetLoading),
                 (spawn_world_borders, spawn_ldtk_world),
             )
             .add_systems(Update, (adjust_chunks).run_if(in_state(GameState::Gaming)));

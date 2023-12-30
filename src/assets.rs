@@ -41,4 +41,12 @@ pub struct GameAssets {
     // --- MAP ---
     #[asset(path = "map/level.ldtk")]
     pub level: Handle<LdtkProject>,
+
+    // --- UI ---
+    #[asset(path = "ui/white_pixel.png")]
+    pub white_pixel: Handle<Image>,
+
+    // --- FONT ---
+    #[asset(path = "fonts/PressStart2P.ttf")]
+    pub font: Handle<Font>,
 }

@@ -2,6 +2,7 @@ pub mod camera;
 pub mod camera_shake;
 
 mod map;
+mod restart;
 mod world_debug;
 
 pub use camera::MainCamera;
@@ -22,6 +23,7 @@ impl Plugin for WorldPlugin {
             camera_shake::CameraShakePlugin,
             world_debug::WorldDebugPlugin,
             map::MapPlugin,
+            restart::RestartPlugin,
         ))
         .add_systems(Startup, configure_physics);
     }

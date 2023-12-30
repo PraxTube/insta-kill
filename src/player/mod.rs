@@ -1,7 +1,9 @@
 pub mod input;
+pub mod speed_timer;
 pub mod state;
 pub mod strike;
 
+mod collision;
 mod movement;
 mod spawn;
 
@@ -23,6 +25,8 @@ impl Plugin for PlayerPlugin {
             spawn::PlayerSpawnPlugin,
             state::PlayerStatePlugin,
             strike::PlayerStrikePlugin,
+            collision::PlayerCollisionPlugin,
+            speed_timer::SpeedTimerPlugin,
         ));
     }
 }
@@ -32,6 +36,7 @@ pub struct Player {
     pub state: PlayerState,
     pub current_direction: Vec2,
     pub collider_entity: Entity,
+    pub disabled: bool,
 }
 
 impl Player {
@@ -40,6 +45,7 @@ impl Player {
             state: PlayerState::default(),
             current_direction: Vec2::ZERO,
             collider_entity,
+            disabled: false,
         }
     }
 }

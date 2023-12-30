@@ -84,6 +84,12 @@ fn despawn_enemies(mut commands: Commands, q_enemies: Query<(Entity, &Enemy)>) {
     }
 }
 
+fn disable_enemies(mut q_enemies: Query<&mut Enemy>) {
+    for mut enemy in &mut q_enemies {
+        enemy.disabled = true;
+    }
+}
+
 fn tick_enemy_spawn_cooldown(
     time: Res<Time>,
     mut enemy_spawn_cooldown: ResMut<EnemySpawnCooldown>,
@@ -95,13 +101,14 @@ pub struct EnemySpawnPlugin;
 
 impl Plugin for EnemySpawnPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            (spawn_enemies, despawn_enemies, tick_enemy_spawn_cooldown)
-                .run_if(in_state(GameState::Gaming)),
-        )
-        .insert_resource(EnemySpawnCooldown {
+        app.insert_resource(EnemySpawnCooldown {
             timer: Timer::from_seconds(1.0, TimerMode::Repeating),
-        });
+        })
+        .add_systems(
+            Update,
+            (spawn_enemies, tick_enemy_spawn_cooldown).run_if(in_state(GameState::Gaming)),
+        )
+        .add_systems(Update, (despawn_enemies,))
+        .add_systems(OnEnter(GameState::Restart), disable_enemies);
     }
 }

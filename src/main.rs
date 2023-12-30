@@ -3,6 +3,7 @@
 mod assets;
 mod enemy;
 mod player;
+mod ui;
 mod utils;
 mod world;
 
@@ -24,7 +25,7 @@ pub enum GameState {
     AssetLoading,
     Gaming,
     GameOver,
-    Win,
+    Restart,
 }
 
 fn main() {
@@ -63,6 +64,7 @@ fn main() {
             utils::UtilsPlugin,
             player::PlayerPlugin,
             enemy::EnemyPlugin,
+            ui::UiPlugin,
         ))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .run();
