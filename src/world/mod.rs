@@ -1,9 +1,9 @@
 pub mod camera;
 pub mod camera_shake;
+pub mod world_debug;
 
 mod map;
 mod restart;
-mod world_debug;
 
 pub use camera::MainCamera;
 pub use camera_shake::CameraShake;

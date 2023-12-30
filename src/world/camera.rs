@@ -9,7 +9,7 @@ use bevy_rapier2d::dynamics::Velocity;
 use super::camera_shake::{update_camera, CameraShake};
 use crate::player::input::PlayerInput;
 use crate::player::Player;
-use crate::utils::DebugMode;
+use crate::world::world_debug::DebugMode;
 use crate::GameState;
 
 // How much `1.0` in bevy coordinates translates to the pixels of a sprite.

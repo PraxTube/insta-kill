@@ -3,7 +3,7 @@ use bevy::input::InputSystem;
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, Window};
 
-use crate::utils::DebugMode;
+use crate::world::world_debug::DebugMode;
 use crate::world::MainCamera;
 
 #[derive(Resource, Default)]
