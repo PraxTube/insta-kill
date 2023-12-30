@@ -2,17 +2,70 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use bevy_trickfilm::prelude::*;
 
+use crate::utils::{FixedRotation, COLLISION_GROUPS_NONE};
 use crate::world::camera::YSort;
 use crate::{GameAssets, GameState};
 
 use super::{Player, PLAYER_SPAWN_POS};
 
+const SHADOW_OFFSET: Vec3 = Vec3::new(0.0, -23.0, 0.0);
+
+#[derive(Component)]
+pub struct PlayerCollider;
+#[derive(Component)]
+pub struct PlayerDashCollider;
+#[derive(Component)]
+pub struct PlayerDashColliderContainer;
+
 fn spawn_player(mut commands: Commands, assets: Res<GameAssets>) {
     let mut animator = AnimationPlayer2D::default();
     animator.play(assets.player_animations[0].clone()).repeat();
 
-    let entity = commands
+    let collider = commands
         .spawn((
+            PlayerCollider,
+            Collider::ball(5.0),
+            ActiveEvents::COLLISION_EVENTS,
+            CollisionGroups::default(),
+            TransformBundle::from_transform(Transform::from_translation(Vec3::new(
+                0.0, -10.0, 0.0,
+            ))),
+        ))
+        .id();
+
+    let dash_collider = commands
+        .spawn((
+            PlayerDashCollider,
+            Sensor,
+            Collider::ball(25.0),
+            COLLISION_GROUPS_NONE,
+            TransformBundle::from_transform(Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))),
+        ))
+        .id();
+
+    let dash_collider_container = commands
+        .spawn((PlayerDashColliderContainer, TransformBundle::default()))
+        .push_children(&[dash_collider])
+        .id();
+
+    let shadow = commands
+        .spawn((
+            FixedRotation {
+                offset: SHADOW_OFFSET,
+                ..default()
+            },
+            YSort(-1.0),
+            SpriteBundle {
+                texture: assets.player_shadow.clone(),
+                transform: Transform::from_translation(SHADOW_OFFSET),
+                ..default()
+            },
+        ))
+        .id();
+
+    commands
+        .spawn((
+            Player::new(collider),
             RigidBody::Dynamic,
             LockedAxes::ROTATION_LOCKED,
             Velocity::zero(),
@@ -26,34 +79,7 @@ fn spawn_player(mut commands: Commands, assets: Res<GameAssets>) {
                 ..default()
             },
         ))
-        .id();
-
-    let collider = commands
-        .spawn((
-            Collider::ball(7.0),
-            ActiveEvents::COLLISION_EVENTS,
-            CollisionGroups::default(),
-            TransformBundle::from_transform(Transform::from_translation(Vec3::new(
-                0.0, -10.0, 0.0,
-            ))),
-        ))
-        .id();
-
-    let shadow = commands
-        .spawn((
-            YSort(-1.0),
-            SpriteBundle {
-                texture: assets.player_shadow.clone(),
-                transform: Transform::from_translation(Vec3::new(0.0, -23.0, 0.0)),
-                ..default()
-            },
-        ))
-        .id();
-
-    commands
-        .entity(entity)
-        .insert(Player::new(collider))
-        .push_children(&[shadow, collider]);
+        .push_children(&[shadow, collider, dash_collider_container]);
 }
 
 fn despawn_player(mut commands: Commands, q_player: Query<Entity, With<Player>>) {

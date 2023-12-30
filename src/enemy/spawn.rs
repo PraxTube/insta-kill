@@ -126,7 +126,7 @@ pub struct EnemySpawnPlugin;
 impl Plugin for EnemySpawnPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(EnemySpawnCooldown {
-            timer: Timer::from_seconds(0.5, TimerMode::Repeating),
+            timer: Timer::from_seconds(0.3, TimerMode::Repeating),
         })
         .add_event::<DespawnEnemy>()
         .add_systems(

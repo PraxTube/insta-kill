@@ -28,11 +28,23 @@ struct StrikeCooldown {
 
 #[derive(Component)]
 pub struct Strike;
+#[derive(Component)]
+pub struct StrikeCollider {
+    timer: Timer,
+}
 
 #[derive(Event)]
 pub struct SpawnStrike {
     pub rot: Quat,
     strike_index: usize,
+}
+
+impl Default for StrikeCollider {
+    fn default() -> Self {
+        Self {
+            timer: Timer::from_seconds(0.1, TimerMode::Once),
+        }
+    }
 }
 
 fn spawn_strikes(
@@ -52,11 +64,12 @@ fn spawn_strikes(
 
         let collider = commands
             .spawn((
+                StrikeCollider::default(),
                 Sensor,
                 Collider::capsule(Vec2::new(0.0, 15.0), Vec2::new(0.0, -15.0), 15.0),
                 CollisionGroups::default(),
                 TransformBundle::from_transform(Transform::from_translation(Vec3::new(
-                    20.0, 0.0, 0.0,
+                    25.0, 0.0, 0.0,
                 ))),
             ))
             .id();
@@ -151,6 +164,19 @@ fn tick_strike_cooldown(time: Res<Time>, mut strike_cooldown: ResMut<StrikeCoold
     strike_cooldown.absolute_cooldown.tick(time.delta());
 }
 
+fn tick_strike_collider_timers(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut q_strike_colliders: Query<(Entity, &mut StrikeCollider)>,
+) {
+    for (entity, mut strike_collider) in &mut q_strike_colliders {
+        strike_collider.timer.tick(time.delta());
+        if strike_collider.timer.just_finished() {
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
 pub struct PlayerStrikePlugin;
 
 impl Plugin for PlayerStrikePlugin {
@@ -162,6 +188,7 @@ impl Plugin for PlayerStrikePlugin {
                 despawn_strikes,
                 trigger_strike,
                 tick_strike_cooldown,
+                tick_strike_collider_timers,
             )
                 .run_if(in_state(GameState::Gaming)),
         )

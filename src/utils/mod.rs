@@ -1,5 +1,7 @@
 use bevy::prelude::*;
-use bevy_rapier2d::plugin::RapierTransformPropagateSet;
+use bevy_rapier2d::{plugin::RapierTransformPropagateSet, prelude::*};
+
+pub const COLLISION_GROUPS_NONE: CollisionGroups = CollisionGroups::new(Group::NONE, Group::NONE);
 
 pub struct UtilsPlugin;
 
@@ -25,7 +27,7 @@ pub fn quat_from_vec3(direction: Vec3) -> Quat {
     quat_from_vec2(direction.truncate())
 }
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct FixedRotation {
     pub offset: Vec3,
     pub rot: Quat,

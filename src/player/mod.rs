@@ -1,11 +1,12 @@
 pub mod input;
+pub mod spawn;
 pub mod speed_timer;
 pub mod state;
 pub mod strike;
 
 mod collision;
+mod dash;
 mod movement;
-mod spawn;
 
 use bevy::prelude::*;
 
@@ -14,6 +15,7 @@ use state::PlayerState;
 pub const PLAYER_SPAWN_POS: Vec3 = Vec3::new(100.0, 100.0, 0.0);
 
 const MOVE_SPEED: f32 = 400.0;
+const DASH_MULTIPLIER: f32 = 2.0;
 
 pub struct PlayerPlugin;
 
@@ -27,6 +29,7 @@ impl Plugin for PlayerPlugin {
             strike::PlayerStrikePlugin,
             collision::PlayerCollisionPlugin,
             speed_timer::SpeedTimerPlugin,
+            dash::PlayerDashPlugin,
         ));
     }
 }

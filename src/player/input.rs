@@ -13,6 +13,7 @@ pub struct MouseWorldCoords(pub Vec2);
 pub struct PlayerInput {
     pub move_direction: Vec2,
     pub attack: bool,
+    pub dash: bool,
     pub zoom: f32,
     pub escape: bool,
     pub toggle_fullscreen: bool,
@@ -104,14 +105,14 @@ fn player_movement(keys: Res<Input<KeyCode>>, mut player_input: ResMut<PlayerInp
     player_input.move_direction = direction.normalize_or_zero();
 }
 
-fn attack(
-    keys: Res<Input<KeyCode>>,
-    mouse_buttons: Res<Input<MouseButton>>,
-    mut player_input: ResMut<PlayerInput>,
-) {
-    let pressed =
-        keys.just_pressed(KeyCode::Space) || mouse_buttons.just_pressed(MouseButton::Left);
+fn attack(mouse_buttons: Res<Input<MouseButton>>, mut player_input: ResMut<PlayerInput>) {
+    let pressed = mouse_buttons.just_pressed(MouseButton::Left);
     player_input.attack = pressed;
+}
+
+fn dash(keys: Res<Input<KeyCode>>, mut player_input: ResMut<PlayerInput>) {
+    let pressed = keys.just_pressed(KeyCode::ShiftLeft) || keys.just_pressed(KeyCode::Space);
+    player_input.dash = pressed;
 }
 
 fn input_escape(keys: Res<Input<KeyCode>>, mut player_input: ResMut<PlayerInput>) {
@@ -156,6 +157,7 @@ impl Plugin for InputPlugin {
                 zoom_camera,
                 player_movement,
                 attack,
+                dash,
                 input_escape,
                 toggle_fullscreen,
                 restart,

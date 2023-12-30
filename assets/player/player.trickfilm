@@ -9,4 +9,9 @@
         keyframes: KeyframesRange((start: 23, end: 29)),
         duration: 0.5,
     ),
+    (
+        name: "dashing",
+        keyframes: KeyframesRange((start: 10, end: 19)),
+        duration: 0.6,
+    ),
 ]

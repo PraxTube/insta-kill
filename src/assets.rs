@@ -11,7 +11,11 @@ pub struct GameAssets {
     #[asset(path = "player/player.png")]
     pub player: Handle<TextureAtlas>,
     #[asset(
-        paths("player/player.trickfilm#idle", "player/player.trickfilm#moving",),
+        paths(
+            "player/player.trickfilm#idle",
+            "player/player.trickfilm#moving",
+            "player/player.trickfilm#dashing",
+        ),
         collection(typed)
     )]
     pub player_animations: Vec<Handle<AnimationClip2D>>,

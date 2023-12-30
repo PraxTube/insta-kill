@@ -33,7 +33,7 @@ pub fn apply_y_sort(mut q_transforms: Query<(&mut Transform, &GlobalTransform, &
 
 fn spawn_camera(mut commands: Commands) {
     let mut camera = Camera2dBundle::default();
-    camera.projection.scaling_mode = ScalingMode::FixedVertical(400.0);
+    camera.projection.scaling_mode = ScalingMode::FixedVertical(600.0);
     commands.spawn((MainCamera, AudioReceiver, camera));
 }
 

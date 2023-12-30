@@ -10,6 +10,7 @@ pub enum PlayerState {
     #[default]
     Idling,
     Moving,
+    Dashing,
 }
 
 #[derive(Event)]
@@ -49,6 +50,7 @@ fn update_animations(
     let animation = match player.state {
         PlayerState::Idling => assets.player_animations[0].clone(),
         PlayerState::Moving => assets.player_animations[1].clone(),
+        PlayerState::Dashing => assets.player_animations[2].clone(),
     };
 
     animation_player.play(animation).repeat();
@@ -59,11 +61,31 @@ fn adjust_sprite_flip(mut q_player: Query<(&mut TextureAtlasSprite, &Player)>) {
         Ok(r) => r,
         Err(_) => return,
     };
-    if player.current_direction.x == 0.0 {
+    // if player.current_direction.x == 0.0 {
+    //     return;
+    // }
+
+    if player.state == PlayerState::Dashing {
+        sprite.flip_x = false;
         return;
     }
 
     sprite.flip_x = player.current_direction.x < 0.0;
+}
+
+fn leave_dash(mut q_player: Query<(&mut Player, &AnimationPlayer2D)>) {
+    let (mut player, animator) = match q_player.get_single_mut() {
+        Ok(r) => r,
+        Err(_) => return,
+    };
+
+    if player.state != PlayerState::Dashing {
+        return;
+    }
+
+    if animator.is_finished() {
+        player.state = PlayerState::Idling;
+    }
 }
 
 pub struct PlayerStatePlugin;
@@ -72,7 +94,12 @@ impl Plugin for PlayerStatePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             PostUpdate,
-            (player_changed_state, update_animations, adjust_sprite_flip)
+            (
+                player_changed_state,
+                update_animations,
+                leave_dash.after(update_animations),
+                adjust_sprite_flip,
+            )
                 .run_if(in_state(GameState::Gaming)),
         )
         .add_event::<PlayerChangedState>();
