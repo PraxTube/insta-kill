@@ -10,7 +10,7 @@ use crate::{player::Player, world::camera::YSort, GameAssets, GameState};
 
 use super::Enemy;
 
-const OFFSET: f32 = 250.0;
+const OFFSET: f32 = 350.0;
 
 #[derive(Resource)]
 struct EnemySpawnCooldown {
@@ -45,9 +45,7 @@ fn spawn_enemies(
             Collider::ball(8.0),
             ActiveEvents::COLLISION_EVENTS,
             CollisionGroups::default(),
-            TransformBundle::from_transform(Transform::from_translation(Vec3::new(
-                0.0, -10.0, 0.0,
-            ))),
+            TransformBundle::from_transform(Transform::from_translation(Vec3::new(0.0, -5.0, 0.0))),
         ))
         .id();
 
@@ -97,16 +95,31 @@ fn tick_enemy_spawn_cooldown(
     enemy_spawn_cooldown.timer.tick(time.delta());
 }
 
+fn adjust_sprite_flip(
+    q_player: Query<&Transform, With<Player>>,
+    mut q_enemies: Query<(&Transform, &mut TextureAtlasSprite), With<Enemy>>,
+) {
+    let player_pos = match q_player.get_single() {
+        Ok(r) => r.translation,
+        Err(_) => return,
+    };
+
+    for (transform, mut sprite) in &mut q_enemies {
+        sprite.flip_x = player_pos.x > transform.translation.x;
+    }
+}
+
 pub struct EnemySpawnPlugin;
 
 impl Plugin for EnemySpawnPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(EnemySpawnCooldown {
-            timer: Timer::from_seconds(1.0, TimerMode::Repeating),
+            timer: Timer::from_seconds(0.5, TimerMode::Repeating),
         })
         .add_systems(
             Update,
-            (spawn_enemies, tick_enemy_spawn_cooldown).run_if(in_state(GameState::Gaming)),
+            (spawn_enemies, tick_enemy_spawn_cooldown, adjust_sprite_flip)
+                .run_if(in_state(GameState::Gaming)),
         )
         .add_systems(Update, (despawn_enemies,))
         .add_systems(OnEnter(GameState::Restart), disable_enemies);

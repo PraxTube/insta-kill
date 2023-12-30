@@ -30,11 +30,11 @@ fn spawn_player(mut commands: Commands, assets: Res<GameAssets>) {
 
     let collider = commands
         .spawn((
-            Collider::ball(9.0),
+            Collider::ball(7.0),
             ActiveEvents::COLLISION_EVENTS,
             CollisionGroups::default(),
             TransformBundle::from_transform(Transform::from_translation(Vec3::new(
-                0.0, -15.0, 0.0,
+                0.0, -10.0, 0.0,
             ))),
         ))
         .id();
@@ -56,22 +56,23 @@ fn spawn_player(mut commands: Commands, assets: Res<GameAssets>) {
         .push_children(&[shadow, collider]);
 }
 
-fn despawn_player(
-    mut commands: Commands,
-    mut next_state: ResMut<NextState<GameState>>,
-    q_player: Query<(Entity, &Player)>,
-) {
-    let (entity, player) = match q_player.get_single() {
+fn despawn_player(mut commands: Commands, q_player: Query<Entity, With<Player>>) {
+    let entity = match q_player.get_single() {
+        Ok(r) => r,
+        Err(_) => return,
+    };
+    commands.entity(entity).despawn_recursive();
+}
+
+fn trigger_game_over(mut next_state: ResMut<NextState<GameState>>, q_player: Query<&Player>) {
+    let player = match q_player.get_single() {
         Ok(r) => r,
         Err(_) => return,
     };
 
-    if !player.disabled {
-        return;
+    if player.disabled {
+        next_state.set(GameState::GameOver);
     }
-
-    commands.entity(entity).despawn_recursive();
-    next_state.set(GameState::GameOver);
 }
 
 pub struct PlayerSpawnPlugin;
@@ -81,7 +82,8 @@ impl Plugin for PlayerSpawnPlugin {
         app.add_systems(OnEnter(GameState::Gaming), spawn_player)
             .add_systems(
                 Update,
-                (despawn_player,).run_if(in_state(GameState::Gaming)),
-            );
+                (trigger_game_over,).run_if(in_state(GameState::Gaming)),
+            )
+            .add_systems(OnEnter(GameState::GameOver), despawn_player);
     }
 }

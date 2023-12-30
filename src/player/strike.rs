@@ -53,10 +53,10 @@ fn spawn_strikes(
         let collider = commands
             .spawn((
                 Sensor,
-                Collider::ball(30.0),
+                Collider::capsule(Vec2::new(0.0, 15.0), Vec2::new(0.0, -15.0), 15.0),
                 CollisionGroups::default(),
                 TransformBundle::from_transform(Transform::from_translation(Vec3::new(
-                    15.0, 0.0, 0.0,
+                    20.0, 0.0, 0.0,
                 ))),
             ))
             .id();
