@@ -17,6 +17,11 @@ struct EnemySpawnCooldown {
     timer: Timer,
 }
 
+#[derive(Event)]
+pub struct DespawnEnemy {
+    pub pos: Vec2,
+}
+
 fn spawn_enemies(
     mut commands: Commands,
     assets: Res<GameAssets>,
@@ -74,9 +79,16 @@ fn spawn_enemies(
         .push_children(&[shadow, collider]);
 }
 
-fn despawn_enemies(mut commands: Commands, q_enemies: Query<(Entity, &Enemy)>) {
-    for (entity, enemy) in &q_enemies {
+fn despawn_enemies(
+    mut commands: Commands,
+    q_enemies: Query<(Entity, &Transform, &Enemy)>,
+    mut ev_despawn_enemy: EventWriter<DespawnEnemy>,
+) {
+    for (entity, transform, enemy) in &q_enemies {
         if enemy.disabled {
+            ev_despawn_enemy.send(DespawnEnemy {
+                pos: transform.translation.truncate(),
+            });
             commands.entity(entity).despawn_recursive();
         }
     }
@@ -116,6 +128,7 @@ impl Plugin for EnemySpawnPlugin {
         app.insert_resource(EnemySpawnCooldown {
             timer: Timer::from_seconds(0.5, TimerMode::Repeating),
         })
+        .add_event::<DespawnEnemy>()
         .add_systems(
             Update,
             (spawn_enemies, tick_enemy_spawn_cooldown, adjust_sprite_flip)

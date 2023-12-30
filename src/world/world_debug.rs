@@ -5,6 +5,8 @@ use bevy_screen_diagnostics::{
     ScreenFrameDiagnosticsPlugin,
 };
 
+use crate::GameState;
+
 #[derive(Resource, Default)]
 pub struct DebugMode {
     pub active: bool,
@@ -62,7 +64,7 @@ impl Plugin for WorldDebugPlugin {
         ))
         .init_resource::<DebugMode>()
         .init_resource::<Diagnostics>()
-        .add_systems(Startup, toggle_off)
+        .add_systems(OnExit(GameState::AssetLoading), toggle_off)
         .add_systems(
             Update,
             toggle_diagnostics.run_if(resource_changed::<DebugMode>()),

@@ -1,4 +1,5 @@
 mod collision;
+mod hit_effect;
 mod movement;
 mod spawn;
 
@@ -14,6 +15,7 @@ impl Plugin for EnemyPlugin {
             spawn::EnemySpawnPlugin,
             collision::EnemyCollisionPlugin,
             movement::EnemyMovementPlugin,
+            hit_effect::EnemyHitEffectPlugin,
         ));
     }
 }

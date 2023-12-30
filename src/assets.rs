@@ -35,6 +35,12 @@ pub struct GameAssets {
     )]
     pub enemy_animations: Vec<Handle<AnimationClip2D>>,
 
+    #[asset(texture_atlas(tile_size_x = 34.0, tile_size_y = 34.0, columns = 7, rows = 1))]
+    #[asset(path = "enemy/enemy_hit.png")]
+    pub enemy_hit: Handle<TextureAtlas>,
+    #[asset(paths("enemy/enemy_hit.trickfilm#main"), collection(typed))]
+    pub enemy_hit_animations: Vec<Handle<AnimationClip2D>>,
+
     #[asset(path = "enemy/enemy_shadow.png")]
     pub enemy_shadow: Handle<Image>,
 
