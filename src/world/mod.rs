@@ -1,5 +1,6 @@
 pub mod camera;
 pub mod camera_shake;
+pub mod seed;
 pub mod world_debug;
 
 mod map;
@@ -14,6 +15,8 @@ use bevy_rapier2d::prelude::*;
 const BACKGROUND_ZINDEX_ABS: f32 = 1000.0;
 const CHUNK_SIZE: f32 = 32.0 * 32.0;
 
+pub type GameRng = rand_xoshiro::Xoshiro256PlusPlus;
+
 pub struct WorldPlugin;
 
 impl Plugin for WorldPlugin {
@@ -24,6 +27,7 @@ impl Plugin for WorldPlugin {
             world_debug::WorldDebugPlugin,
             map::MapPlugin,
             restart::RestartPlugin,
+            seed::GameSeedPlugin,
         ))
         .add_systems(Startup, configure_physics);
     }

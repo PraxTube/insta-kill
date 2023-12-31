@@ -135,6 +135,7 @@ impl Plugin for PlayerDashPlugin {
                 toggle_player_collider,
                 reset_dash_rotation,
             )
+                .chain()
                 .run_if(in_state(GameState::Gaming)),
         );
     }

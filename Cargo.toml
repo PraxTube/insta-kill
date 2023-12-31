@@ -1,5 +1,5 @@
 [package]
-name = "onehit"
+name = "insta-kill"
 version = "0.1.0"
 edition = "2021"
 
@@ -14,8 +14,9 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-rand = "0.8.5"
 chrono = "0.4.31"
+rand = "0.8.5"
+rand_xoshiro = "0.6.0"
 
 bevy = "0.12.1"
 bevy_screen_diagnostics = "0.4.0"
