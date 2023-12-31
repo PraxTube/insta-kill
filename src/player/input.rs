@@ -14,6 +14,7 @@ pub struct PlayerInput {
     pub move_direction: Vec2,
     pub attack: bool,
     pub dash: bool,
+    pub hook: bool,
     pub zoom: f32,
     pub escape: bool,
     pub toggle_fullscreen: bool,
@@ -115,6 +116,11 @@ fn dash(keys: Res<Input<KeyCode>>, mut player_input: ResMut<PlayerInput>) {
     player_input.dash = pressed;
 }
 
+fn hook(mouse_buttons: Res<Input<MouseButton>>, mut player_input: ResMut<PlayerInput>) {
+    let pressed = mouse_buttons.just_pressed(MouseButton::Right);
+    player_input.hook = pressed;
+}
+
 fn input_escape(keys: Res<Input<KeyCode>>, mut player_input: ResMut<PlayerInput>) {
     player_input.escape = keys.just_pressed(KeyCode::Escape);
 }
@@ -158,6 +164,7 @@ impl Plugin for InputPlugin {
                 player_movement,
                 attack,
                 dash,
+                hook,
                 input_escape,
                 toggle_fullscreen,
                 restart,

@@ -22,5 +22,6 @@ impl Plugin for EnemyPlugin {
 
 #[derive(Component, Default)]
 pub struct Enemy {
+    pub stunned: bool,
     pub disabled: bool,
 }

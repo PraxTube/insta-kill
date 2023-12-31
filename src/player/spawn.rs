@@ -6,7 +6,7 @@ use crate::utils::{FixedRotation, COLLISION_GROUPS_NONE};
 use crate::world::camera::YSort;
 use crate::{GameAssets, GameState};
 
-use super::{Player, PLAYER_SPAWN_POS};
+use super::{Player, PLAYER_HITBOX_OFFSET, PLAYER_SPAWN_POS};
 
 const SHADOW_OFFSET: Vec3 = Vec3::new(0.0, -23.0, 0.0);
 
@@ -27,9 +27,7 @@ fn spawn_player(mut commands: Commands, assets: Res<GameAssets>) {
             Collider::ball(1.0),
             ActiveEvents::COLLISION_EVENTS,
             CollisionGroups::default(),
-            TransformBundle::from_transform(Transform::from_translation(Vec3::new(
-                0.0, -10.0, 0.0,
-            ))),
+            TransformBundle::from_transform(Transform::from_translation(PLAYER_HITBOX_OFFSET)),
         ))
         .id();
 

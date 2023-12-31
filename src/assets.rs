@@ -15,6 +15,8 @@ pub struct GameAssets {
             "player/player.trickfilm#idle",
             "player/player.trickfilm#moving",
             "player/player.trickfilm#dashing",
+            "player/player.trickfilm#hooking",
+            "player/player.trickfilm#sliding",
         ),
         collection(typed)
     )]
@@ -25,6 +27,12 @@ pub struct GameAssets {
     pub player_strike: Handle<TextureAtlas>,
     #[asset(paths("player/player_strike.trickfilm#main"), collection(typed))]
     pub player_strike_animations: Vec<Handle<AnimationClip2D>>,
+
+    #[asset(texture_atlas(tile_size_x = 320.0, tile_size_y = 10.0, columns = 1, rows = 5))]
+    #[asset(path = "player/player_hook.png")]
+    pub player_hook: Handle<TextureAtlas>,
+    #[asset(paths("player/player_hook.trickfilm#main"), collection(typed))]
+    pub player_hook_animations: Vec<Handle<AnimationClip2D>>,
 
     #[asset(path = "player/player_shadow.png")]
     pub player_shadow: Handle<Image>,

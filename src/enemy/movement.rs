@@ -15,7 +15,7 @@ fn move_enemies(
     };
 
     for (mut transform, enemy) in &mut q_enemies {
-        if enemy.disabled {
+        if enemy.disabled || enemy.stunned {
             continue;
         }
 

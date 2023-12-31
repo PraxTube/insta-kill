@@ -39,8 +39,8 @@ fn world_coords_to_map_indices(position: Vec3) -> (i32, i32) {
 }
 
 fn map_indices_to_index(x_index: i32, y_index: i32, seed: u32) -> usize {
-    let m = x_index.abs() as u64;
-    let n = y_index.abs() as u64;
+    let m = x_index.unsigned_abs() as u64;
+    let n = y_index.unsigned_abs() as u64;
 
     let seed: u64 = seed as u64 + m + n;
     let mut rng = GameRng::seed_from_u64(seed);

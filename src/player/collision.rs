@@ -3,7 +3,7 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{enemy::Enemy, GameState};
 
-use super::Player;
+use super::{hook::PlayerHook, state::PlayerState, Player};
 
 fn enemy_collisions(
     mut q_player: Query<&mut Player>,
@@ -49,13 +49,62 @@ fn enemy_collisions(
     }
 }
 
+fn hook_enemy_collision(
+    mut q_player: Query<&mut Player>,
+    q_hooks: Query<&PlayerHook>,
+    mut q_enemies: Query<(&Transform, &mut Enemy)>,
+    q_colliders: Query<&Parent, (With<Collider>, Without<Enemy>, Without<Player>)>,
+    mut ev_collision_events: EventReader<CollisionEvent>,
+) {
+    let mut player = match q_player.get_single_mut() {
+        Ok(r) => r,
+        Err(_) => return,
+    };
+
+    for ev in ev_collision_events.read() {
+        let (source, target) = match ev {
+            CollisionEvent::Started(source, target, _) => (source, target),
+            CollisionEvent::Stopped(_, _, _) => continue,
+        };
+
+        let source_parent = match q_colliders.get(*source) {
+            Ok(p) => p.get(),
+            Err(_) => continue,
+        };
+        let target_parent = match q_colliders.get(*target) {
+            Ok(p) => p.get(),
+            Err(_) => continue,
+        };
+
+        let (enemy_transform, mut enemy) = if let Ok(r) = q_enemies.get_mut(source_parent) {
+            r
+        } else if let Ok(r) = q_enemies.get_mut(target_parent) {
+            r
+        } else {
+            continue;
+        };
+
+        let _ = if let Ok(r) = q_hooks.get(source_parent) {
+            r
+        } else if let Ok(r) = q_hooks.get(target_parent) {
+            r
+        } else {
+            continue;
+        };
+
+        player.state = PlayerState::Sliding;
+        player.hook_target_pos = enemy_transform.translation.truncate();
+        enemy.stunned = true;
+    }
+}
+
 pub struct PlayerCollisionPlugin;
 
 impl Plugin for PlayerCollisionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (enemy_collisions,).run_if(in_state(GameState::Gaming)),
+            (enemy_collisions, hook_enemy_collision).run_if(in_state(GameState::Gaming)),
         );
     }
 }

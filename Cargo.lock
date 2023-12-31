@@ -1088,7 +1088,7 @@ dependencies = [
 [[package]]
 name = "bevy_trickfilm"
 version = "0.5.0"
-source = "git+https://github.com/PraxTube/bevy_trickfilm?branch=main#e99dd455410d82ba2ea95c57c59efeabc381a1d2"
+source = "git+https://github.com/PraxTube/bevy_trickfilm?branch=main#ffecbbe29948cef33a9b9bfc15cac13ebfa3d3ed"
 dependencies = [
  "bevy",
  "ron",

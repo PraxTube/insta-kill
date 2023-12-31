@@ -3,7 +3,7 @@ use bevy_trickfilm::prelude::*;
 
 use crate::{GameAssets, GameState};
 
-use super::Player;
+use super::{Player, HOOK_TIME};
 
 #[derive(Debug, Default, PartialEq, Clone, Copy)]
 pub enum PlayerState {
@@ -11,6 +11,8 @@ pub enum PlayerState {
     Idling,
     Moving,
     Dashing,
+    Hooking,
+    Sliding,
 }
 
 #[derive(Event)]
@@ -42,7 +44,7 @@ fn update_animations(
     assets: Res<GameAssets>,
     mut q_player: Query<(&Player, &mut AnimationPlayer2D)>,
 ) {
-    let (player, mut animation_player) = match q_player.get_single_mut() {
+    let (player, mut animator) = match q_player.get_single_mut() {
         Ok(r) => r,
         Err(_) => return,
     };
@@ -51,9 +53,11 @@ fn update_animations(
         PlayerState::Idling => assets.player_animations[0].clone(),
         PlayerState::Moving => assets.player_animations[1].clone(),
         PlayerState::Dashing => assets.player_animations[2].clone(),
+        PlayerState::Hooking => assets.player_animations[3].clone(),
+        PlayerState::Sliding => assets.player_animations[4].clone(),
     };
 
-    animation_player.play(animation).repeat();
+    animator.play(animation).repeat();
 }
 
 fn adjust_sprite_flip(mut q_player: Query<(&mut TextureAtlasSprite, &Player)>) {
@@ -61,10 +65,10 @@ fn adjust_sprite_flip(mut q_player: Query<(&mut TextureAtlasSprite, &Player)>) {
         Ok(r) => r,
         Err(_) => return,
     };
-    // if player.current_direction.x == 0.0 {
-    //     return;
-    // }
 
+    if player.state == PlayerState::Hooking || player.state == PlayerState::Sliding {
+        return;
+    }
     if player.state == PlayerState::Dashing {
         sprite.flip_x = false;
         return;
@@ -88,6 +92,21 @@ fn leave_dash(mut q_player: Query<(&mut Player, &AnimationPlayer2D)>) {
     }
 }
 
+fn stop_hooking(mut q_player: Query<(&mut Player, &AnimationPlayer2D)>) {
+    let (mut player, animator) = match q_player.get_single_mut() {
+        Ok(r) => r,
+        Err(_) => return,
+    };
+
+    if player.state != PlayerState::Hooking {
+        return;
+    }
+
+    if animator.elapsed() >= HOOK_TIME {
+        player.state = PlayerState::Idling;
+    }
+}
+
 pub struct PlayerStatePlugin;
 
 impl Plugin for PlayerStatePlugin {
@@ -98,6 +117,7 @@ impl Plugin for PlayerStatePlugin {
                 player_changed_state,
                 update_animations,
                 leave_dash.after(update_animations),
+                stop_hooking.after(update_animations),
                 adjust_sprite_flip,
             )
                 .run_if(in_state(GameState::Gaming)),

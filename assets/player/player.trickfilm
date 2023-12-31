@@ -14,4 +14,14 @@
         keyframes: KeyframesRange((start: 10, end: 19)),
         duration: 0.6,
     ),
+    (
+        name: "hooking",
+        keyframes: KeyframesVec([94]),
+        duration: 1.0,
+    ),
+    (
+        name: "sliding",
+        keyframes: KeyframesVec([95]),
+        duration: 1.0,
+    ),
 ]
