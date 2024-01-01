@@ -1,3 +1,4 @@
+pub mod dash;
 pub mod hook;
 pub mod input;
 pub mod spawn;
@@ -6,7 +7,6 @@ pub mod state;
 pub mod strike;
 
 mod collision;
-mod dash;
 mod movement;
 
 use bevy::prelude::*;
