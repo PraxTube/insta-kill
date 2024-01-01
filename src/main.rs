@@ -1,6 +1,7 @@
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
 mod assets;
+mod effect;
 mod enemy;
 mod player;
 mod ui;
@@ -61,10 +62,11 @@ fn main() {
         )
         .add_plugins((
             world::WorldPlugin,
-            utils::UtilsPlugin,
+            ui::UiPlugin,
+            effect::EffectPlugin,
             player::PlayerPlugin,
             enemy::EnemyPlugin,
-            ui::UiPlugin,
+            utils::UtilsPlugin,
         ))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .run();

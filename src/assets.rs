@@ -60,6 +60,13 @@ pub struct GameAssets {
     #[asset(path = "map/level.ldtk")]
     pub level: Handle<LdtkProject>,
 
+    // --- EFFECTS ---
+    #[asset(texture_atlas(tile_size_x = 64.0, tile_size_y = 64.0, columns = 9, rows = 1))]
+    #[asset(path = "effects/super_sonic.png")]
+    pub super_sonic: Handle<TextureAtlas>,
+    #[asset(paths("effects/super_sonic.trickfilm#main"), collection(typed))]
+    pub super_sonic_animations: Vec<Handle<AnimationClip2D>>,
+
     // --- UI ---
     #[asset(path = "ui/white_pixel.png")]
     pub white_pixel: Handle<Image>,

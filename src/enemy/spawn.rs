@@ -10,7 +10,7 @@ use crate::{player::Player, world::camera::YSort, GameAssets, GameState};
 
 use super::Enemy;
 
-const OFFSET: f32 = 350.0;
+const OFFSET: f32 = 500.0;
 
 #[derive(Resource)]
 struct EnemySpawnCooldown {

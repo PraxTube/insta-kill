@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
+    effect::super_sonic::SpawnSuperSonic,
     utils::{quat_from_vec2, COLLISION_GROUPS_NONE},
     GameState,
 };
@@ -32,6 +33,7 @@ fn move_player(
     mouse_coords: Res<MouseWorldCoords>,
     mut q_player: Query<(&Transform, &mut Velocity), With<Player>>,
     mut ev_player_changed_state: EventReader<PlayerChangedState>,
+    mut ev_spawn_super_sonic: EventWriter<SpawnSuperSonic>,
 ) {
     let (transform, mut velocity) = match q_player.get_single_mut() {
         Ok(r) => r,
@@ -44,7 +46,29 @@ fn move_player(
         }
 
         let dir = (mouse_coords.0 - transform.translation.truncate()).normalize_or_zero();
-        velocity.linvel = dir * DASH_MULTIPLIER * MOVE_SPEED;
+
+        let slide_multiplier = if ev.old_state == PlayerState::Sliding {
+            ev_spawn_super_sonic.send(SpawnSuperSonic {
+                pos: transform.translation.truncate(),
+                dir,
+                scale_factor: 3.0,
+            });
+            ev_spawn_super_sonic.send(SpawnSuperSonic {
+                pos: transform.translation.truncate() + dir * 150.0,
+                dir,
+                scale_factor: 3.0,
+            });
+            ev_spawn_super_sonic.send(SpawnSuperSonic {
+                pos: transform.translation.truncate() + dir * 300.0,
+                dir,
+                scale_factor: 3.0,
+            });
+            2.0
+        } else {
+            1.0
+        };
+
+        velocity.linvel = dir * DASH_MULTIPLIER * slide_multiplier * MOVE_SPEED;
     }
 }
 
