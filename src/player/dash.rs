@@ -42,11 +42,11 @@ fn trigger_dash(player_input: Res<PlayerInput>, mut q_player: Query<&mut Player>
 
 fn move_player(
     mouse_coords: Res<MouseWorldCoords>,
-    mut q_player: Query<(&Transform, &mut Velocity), With<Player>>,
+    mut q_player: Query<(&mut Transform, &mut Velocity), With<Player>>,
     mut ev_player_changed_state: EventReader<PlayerChangedState>,
     mut ev_spawn_super_sonic: EventWriter<SpawnSuperSonic>,
 ) {
-    let (transform, mut velocity) = match q_player.get_single_mut() {
+    let (mut transform, mut velocity) = match q_player.get_single_mut() {
         Ok(r) => r,
         Err(_) => return,
     };
@@ -56,9 +56,8 @@ fn move_player(
             continue;
         }
 
-        let dir = (mouse_coords.0 - transform.translation.truncate()).normalize_or_zero();
-
-        let slide_multiplier = if ev.old_state == PlayerState::Sliding {
+        let (dir, slide_multiplier) = if ev.old_state == PlayerState::Sliding {
+            let dir = velocity.linvel.normalize_or_zero();
             ev_spawn_super_sonic.send(SpawnSuperSonic {
                 pos: transform.translation.truncate(),
                 dir,
@@ -74,31 +73,14 @@ fn move_player(
                 dir,
                 scale_factor: 3.0,
             });
-            2.0
+            (dir, 2.0)
         } else {
-            1.0
+            let dir = (mouse_coords.0 - transform.translation.truncate()).normalize_or_zero();
+            (dir, 1.0)
         };
 
+        transform.rotation = quat_from_vec2(dir);
         velocity.linvel = dir * DASH_MULTIPLIER * slide_multiplier * MOVE_SPEED;
-    }
-}
-
-fn rotate_player(
-    mouse_coords: Res<MouseWorldCoords>,
-    mut q_player: Query<&mut Transform, With<Player>>,
-    mut ev_player_changed_state: EventReader<PlayerChangedState>,
-) {
-    let mut transform = match q_player.get_single_mut() {
-        Ok(r) => r,
-        Err(_) => return,
-    };
-
-    for ev in ev_player_changed_state.read() {
-        if ev.new_state != PlayerState::Dashing {
-            continue;
-        }
-
-        transform.rotation = quat_from_vec2(mouse_coords.0 - transform.translation.truncate());
     }
 }
 
@@ -230,7 +212,6 @@ impl Plugin for PlayerDashPlugin {
             (
                 trigger_dash,
                 move_player,
-                rotate_player,
                 toggle_player_dash_collider,
                 toggle_player_collider,
                 reset_dash_rotation,
