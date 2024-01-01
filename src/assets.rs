@@ -47,14 +47,29 @@ pub struct GameAssets {
     #[asset(texture_atlas(tile_size_x = 96.0, tile_size_y = 80.0, columns = 8, rows = 2))]
     #[asset(path = "enemy/bat/bat.png")]
     pub enemy_bat: Handle<TextureAtlas>,
-    #[asset(
-        paths("enemy/bat/bat.trickfilm#flying", "enemy/bat/bat.trickfilm#dying",),
-        collection(typed)
-    )]
+    #[asset(paths("enemy/bat/bat.trickfilm#flying",), collection(typed))]
     pub enemy_bat_animations: Vec<Handle<AnimationClip2D>>,
 
     #[asset(path = "enemy/bat/bat_shadow.png")]
     pub enemy_bat_shadow: Handle<Image>,
+
+    #[asset(texture_atlas(tile_size_x = 64.0, tile_size_y = 64.0, columns = 8, rows = 7))]
+    #[asset(path = "enemy/archer/archer.png")]
+    pub enemy_archer: Handle<TextureAtlas>,
+    #[asset(
+        paths(
+            "enemy/archer/archer.trickfilm#idling",
+            "enemy/archer/archer.trickfilm#walking",
+            "enemy/archer/archer.trickfilm#shooting",
+        ),
+        collection(typed)
+    )]
+    pub enemy_archer_animations: Vec<Handle<AnimationClip2D>>,
+
+    #[asset(path = "enemy/archer/projectile.png")]
+    pub archer_projectile: Handle<Image>,
+    #[asset(path = "enemy/archer/archer_shadow.png")]
+    pub enemy_archer_shadow: Handle<Image>,
 
     // --- MAP ---
     #[asset(path = "map/level.ldtk")]

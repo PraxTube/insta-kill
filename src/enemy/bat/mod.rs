@@ -1,4 +1,3 @@
-mod collision;
 mod movement;
 mod spawn;
 
@@ -12,10 +11,9 @@ pub struct EnemyBatPlugin;
 
 impl Plugin for EnemyBatPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((
-            spawn::EnemyBatSpawnPlugin,
-            collision::EnemyBatCollisionPlugin,
-            movement::EnemyBatMovementPlugin,
-        ));
+        app.add_plugins((spawn::EnemyBatSpawnPlugin, movement::EnemyBatMovementPlugin));
     }
 }
+
+#[derive(Component)]
+pub struct EnemyBat;

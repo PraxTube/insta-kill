@@ -40,7 +40,7 @@ fn adjust_sprite_flip(
     };
 
     for (transform, mut sprite) in &mut q_enemies {
-        sprite.flip_x = player_pos.x > transform.translation.x;
+        sprite.flip_x = player_pos.x < transform.translation.x;
     }
 }
 

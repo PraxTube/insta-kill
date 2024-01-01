@@ -1,4 +1,6 @@
+mod archer;
 mod bat;
+mod collision;
 mod hit_effect;
 mod spawn;
 
@@ -12,6 +14,8 @@ impl Plugin for EnemyPlugin {
             hit_effect::EnemyHitEffectPlugin,
             spawn::EnemySpawnPlugin,
             bat::EnemyBatPlugin,
+            archer::EnemyArcherPlugin,
+            collision::EnemyCollisionPlugin,
         ));
     }
 }
@@ -21,3 +25,6 @@ pub struct Enemy {
     pub stunned: bool,
     pub disabled: bool,
 }
+
+#[derive(Component, Default)]
+pub struct EnemyProjectile {}

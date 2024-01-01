@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{enemy::Enemy, GameState};
+use crate::{
+    enemy::{Enemy, EnemyProjectile},
+    GameState,
+};
 
 use super::{hook::PlayerHook, state::PlayerState, Player};
 
@@ -49,6 +52,46 @@ fn enemy_collisions(
     }
 }
 
+fn enemy_projectile_collisions(
+    mut q_player: Query<&mut Player>,
+    q_enemy_projectiles: Query<&EnemyProjectile>,
+    q_colliders: Query<&Parent, (With<Collider>, Without<EnemyProjectile>, Without<Player>)>,
+    mut ev_collision_events: EventReader<CollisionEvent>,
+) {
+    let mut player = match q_player.get_single_mut() {
+        Ok(r) => r,
+        Err(_) => return,
+    };
+
+    for ev in ev_collision_events.read() {
+        let (source, target) = match ev {
+            CollisionEvent::Started(source, target, _) => (source, target),
+            CollisionEvent::Stopped(_, _, _) => continue,
+        };
+
+        let enemy_parent = if &player.collider_entity == source {
+            match q_colliders.get(*target) {
+                Ok(parent) => parent,
+                Err(_) => continue,
+            }
+        } else if &player.collider_entity == target {
+            match q_colliders.get(*source) {
+                Ok(parent) => parent,
+                Err(_) => continue,
+            }
+        } else {
+            continue;
+        };
+
+        let _ = match q_enemy_projectiles.get(enemy_parent.get()) {
+            Ok(r) => r,
+            Err(_) => continue,
+        };
+
+        player.disabled = true;
+    }
+}
+
 fn hook_enemy_collision(
     mut q_player: Query<&mut Player>,
     q_hooks: Query<&PlayerHook>,
@@ -60,6 +103,9 @@ fn hook_enemy_collision(
         Ok(r) => r,
         Err(_) => return,
     };
+    if player.state == PlayerState::Dashing {
+        return;
+    }
 
     for ev in ev_collision_events.read() {
         let (source, target) = match ev {
@@ -104,7 +150,12 @@ impl Plugin for PlayerCollisionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (enemy_collisions, hook_enemy_collision).run_if(in_state(GameState::Gaming)),
+            (
+                enemy_collisions,
+                enemy_projectile_collisions,
+                hook_enemy_collision,
+            )
+                .run_if(in_state(GameState::Gaming)),
         );
     }
 }

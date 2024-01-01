@@ -6,11 +6,11 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use bevy_trickfilm::prelude::*;
 
-use crate::{player::Player, world::camera::YSort, GameAssets, GameState};
+use crate::{player::Player, utils::quat_from_vec2, world::camera::YSort, GameAssets, GameState};
 
-use super::{Enemy, EnemyBat};
+use super::{Enemy, EnemyArcher};
 
-const OFFSET: f32 = 500.0;
+const OFFSET: f32 = 1000.0;
 
 #[derive(Resource)]
 struct EnemySpawnCooldown {
@@ -36,7 +36,7 @@ fn spawn_enemies(
 
     let mut animator = AnimationPlayer2D::default();
     animator
-        .play(assets.enemy_bat_animations[0].clone())
+        .play(assets.enemy_archer_animations[0].clone())
         .repeat();
 
     let pos = player_transform.translation
@@ -44,10 +44,13 @@ fn spawn_enemies(
 
     let collider = commands
         .spawn((
-            Collider::ball(8.0),
+            Collider::capsule(Vec2::new(16.0, 0.0), Vec2::new(-16.0, 0.0), 7.0),
             ActiveEvents::COLLISION_EVENTS,
             CollisionGroups::default(),
-            TransformBundle::from_transform(Transform::from_translation(Vec3::new(0.0, -5.0, 0.0))),
+            TransformBundle::from_transform(
+                Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
+                    .with_rotation(quat_from_vec2(Vec2::Y)),
+            ),
         ))
         .id();
 
@@ -55,8 +58,8 @@ fn spawn_enemies(
         .spawn((
             YSort(-1.0),
             SpriteBundle {
-                texture: assets.enemy_bat_shadow.clone(),
-                transform: Transform::from_translation(Vec3::new(0.0, -23.0, 0.0)),
+                texture: assets.enemy_archer_shadow.clone(),
+                transform: Transform::from_translation(Vec3::new(0.0, -16.0, 0.0)),
                 ..default()
             },
         ))
@@ -65,11 +68,11 @@ fn spawn_enemies(
     commands
         .spawn((
             Enemy::default(),
-            EnemyBat,
+            EnemyArcher::default(),
             YSort(0.0),
             animator,
             SpriteSheetBundle {
-                texture_atlas: assets.enemy_bat.clone(),
+                texture_atlas: assets.enemy_archer.clone(),
                 transform: Transform::from_translation(pos).with_scale(Vec3::splat(2.0)),
                 ..default()
             },
@@ -84,12 +87,12 @@ fn tick_enemy_spawn_cooldown(
     enemy_spawn_cooldown.timer.tick(time.delta());
 }
 
-pub struct EnemyBatSpawnPlugin;
+pub struct EnemyArcherSpawnPlugin;
 
-impl Plugin for EnemyBatSpawnPlugin {
+impl Plugin for EnemyArcherSpawnPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(EnemySpawnCooldown {
-            timer: Timer::from_seconds(0.3, TimerMode::Repeating),
+            timer: Timer::from_seconds(1.3, TimerMode::Repeating),
         })
         .add_systems(
             Update,
