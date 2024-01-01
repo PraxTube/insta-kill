@@ -38,23 +38,23 @@ pub struct GameAssets {
     pub player_shadow: Handle<Image>,
 
     // --- ENEMY ---
-    #[asset(texture_atlas(tile_size_x = 96.0, tile_size_y = 80.0, columns = 8, rows = 2))]
-    #[asset(path = "enemy/enemy.png")]
-    pub enemy: Handle<TextureAtlas>,
-    #[asset(
-        paths("enemy/enemy.trickfilm#flying", "enemy/enemy.trickfilm#dying",),
-        collection(typed)
-    )]
-    pub enemy_animations: Vec<Handle<AnimationClip2D>>,
-
     #[asset(texture_atlas(tile_size_x = 34.0, tile_size_y = 34.0, columns = 7, rows = 1))]
     #[asset(path = "enemy/enemy_hit.png")]
     pub enemy_hit: Handle<TextureAtlas>,
     #[asset(paths("enemy/enemy_hit.trickfilm#main"), collection(typed))]
     pub enemy_hit_animations: Vec<Handle<AnimationClip2D>>,
 
-    #[asset(path = "enemy/enemy_shadow.png")]
-    pub enemy_shadow: Handle<Image>,
+    #[asset(texture_atlas(tile_size_x = 96.0, tile_size_y = 80.0, columns = 8, rows = 2))]
+    #[asset(path = "enemy/bat/bat.png")]
+    pub enemy_bat: Handle<TextureAtlas>,
+    #[asset(
+        paths("enemy/bat/bat.trickfilm#flying", "enemy/bat/bat.trickfilm#dying",),
+        collection(typed)
+    )]
+    pub enemy_bat_animations: Vec<Handle<AnimationClip2D>>,
+
+    #[asset(path = "enemy/bat/bat_shadow.png")]
+    pub enemy_bat_shadow: Handle<Image>,
 
     // --- MAP ---
     #[asset(path = "map/level.ldtk")]

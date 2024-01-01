@@ -94,9 +94,9 @@ fn player_dash_collisions(
     }
 }
 
-pub struct EnemyCollisionPlugin;
+pub struct EnemyBatCollisionPlugin;
 
-impl Plugin for EnemyCollisionPlugin {
+impl Plugin for EnemyBatCollisionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, (player_strike_collisions, player_dash_collisions));
     }

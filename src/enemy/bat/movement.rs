@@ -27,9 +27,9 @@ fn move_enemies(
     }
 }
 
-pub struct EnemyMovementPlugin;
+pub struct EnemyBatMovementPlugin;
 
-impl Plugin for EnemyMovementPlugin {
+impl Plugin for EnemyBatMovementPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, (move_enemies,));
     }
