@@ -8,7 +8,7 @@ use bevy_trickfilm::prelude::*;
 
 use crate::{player::Player, utils::quat_from_vec2, world::camera::YSort, GameAssets, GameState};
 
-use super::{Enemy, EnemyArcher};
+use super::{ArcherState, Enemy, EnemyArcher};
 
 const OFFSET: f32 = 1000.0;
 
@@ -44,7 +44,7 @@ fn spawn_enemies(
 
     let collider = commands
         .spawn((
-            Collider::capsule(Vec2::new(16.0, 0.0), Vec2::new(-16.0, 0.0), 7.0),
+            Collider::capsule(Vec2::new(10.0, 0.0), Vec2::new(-10.0, 0.0), 7.0),
             ActiveEvents::COLLISION_EVENTS,
             CollisionGroups::default(),
             TransformBundle::from_transform(
@@ -87,6 +87,14 @@ fn tick_enemy_spawn_cooldown(
     enemy_spawn_cooldown.timer.tick(time.delta());
 }
 
+fn trigger_stunned(mut q_archers: Query<(&Enemy, &mut EnemyArcher)>) {
+    for (enemy, mut archer) in &mut q_archers {
+        if enemy.disabled || enemy.stunned {
+            archer.state = ArcherState::Stunned;
+        }
+    }
+}
+
 pub struct EnemyArcherSpawnPlugin;
 
 impl Plugin for EnemyArcherSpawnPlugin {
@@ -96,7 +104,8 @@ impl Plugin for EnemyArcherSpawnPlugin {
         })
         .add_systems(
             Update,
-            (spawn_enemies, tick_enemy_spawn_cooldown).run_if(in_state(GameState::Gaming)),
+            (spawn_enemies, tick_enemy_spawn_cooldown, trigger_stunned)
+                .run_if(in_state(GameState::Gaming)),
         );
     }
 }

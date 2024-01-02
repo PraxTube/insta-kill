@@ -24,7 +24,10 @@ fn trigger_shooting(
     };
 
     for (archer_transform, mut archer) in &mut q_archers {
-        if archer.state == ArcherState::Shooting {
+        if archer.state == ArcherState::Shooting || archer.state == ArcherState::Stunned {
+            continue;
+        }
+        if !archer.shooting_cooldown.finished() {
             continue;
         }
 
@@ -46,10 +49,7 @@ fn spawn_projectiles(
     };
 
     for (archer_transform, animator, mut archer) in &mut q_archers {
-        if archer.state != ArcherState::Shooting {
-            continue;
-        }
-        if !animator.is_finished() {
+        if archer.state != ArcherState::Shooting || !animator.is_finished() {
             continue;
         }
 
@@ -80,6 +80,8 @@ fn spawn_projectiles(
                 },
             ))
             .push_children(&[collider]);
+        archer.shooting_cooldown.reset();
+        archer.moving_cooldown.reset();
         archer.state = ArcherState::Idling;
     }
 }

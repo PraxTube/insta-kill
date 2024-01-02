@@ -61,6 +61,7 @@ pub struct GameAssets {
             "enemy/archer/archer.trickfilm#idling",
             "enemy/archer/archer.trickfilm#walking",
             "enemy/archer/archer.trickfilm#shooting",
+            "enemy/archer/archer.trickfilm#stunned",
         ),
         collection(typed)
     )]

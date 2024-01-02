@@ -9,6 +9,7 @@ use crate::{GameAssets, GameState};
 
 const MOVE_SPEED: f32 = 80.0;
 const SHOOT_RANGE: f32 = 500.0;
+const SHOOT_COOLDOWN: f32 = 5.0;
 
 pub use super::Enemy;
 
@@ -21,6 +22,7 @@ impl Plugin for EnemyArcherPlugin {
             movement::EnemyArcherMovementPlugin,
             shooting::EnemyArcherShootingPlugin,
         ))
+        .add_systems(Update, (tick_cooldowns,))
         .add_systems(
             PostUpdate,
             (update_animations,).run_if(in_state(GameState::Gaming)),
@@ -34,11 +36,24 @@ enum ArcherState {
     Idling,
     Moving,
     Shooting,
+    Stunned,
 }
 
-#[derive(Component, Default)]
+#[derive(Component)]
 pub struct EnemyArcher {
     state: ArcherState,
+    moving_cooldown: Timer,
+    shooting_cooldown: Timer,
+}
+
+impl Default for EnemyArcher {
+    fn default() -> Self {
+        Self {
+            state: ArcherState::default(),
+            moving_cooldown: Timer::from_seconds(1.0, TimerMode::Once),
+            shooting_cooldown: Timer::from_seconds(SHOOT_COOLDOWN, TimerMode::Once),
+        }
+    }
 }
 
 fn update_animations(
@@ -50,8 +65,16 @@ fn update_animations(
             ArcherState::Idling => assets.enemy_archer_animations[0].clone(),
             ArcherState::Moving => assets.enemy_archer_animations[1].clone(),
             ArcherState::Shooting => assets.enemy_archer_animations[2].clone(),
+            ArcherState::Stunned => assets.enemy_archer_animations[3].clone(),
         };
 
         animator.play(animation).repeat();
+    }
+}
+
+fn tick_cooldowns(time: Res<Time>, mut q_archers: Query<&mut EnemyArcher>) {
+    for mut archer in &mut q_archers {
+        archer.moving_cooldown.tick(time.delta());
+        archer.shooting_cooldown.tick(time.delta());
     }
 }

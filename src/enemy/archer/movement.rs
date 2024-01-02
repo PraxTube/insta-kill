@@ -2,22 +2,31 @@ use bevy::prelude::*;
 
 use crate::player::Player;
 
-use super::{ArcherState, Enemy, EnemyArcher, MOVE_SPEED};
+use super::{ArcherState, EnemyArcher, MOVE_SPEED};
+
+fn trigger_moving(mut q_archers: Query<&mut EnemyArcher>) {
+    for mut archer in &mut q_archers {
+        if !archer.moving_cooldown.finished() {
+            continue;
+        }
+
+        if archer.state == ArcherState::Idling {
+            archer.state = ArcherState::Moving;
+        }
+    }
+}
 
 fn move_archers(
     time: Res<Time>,
     q_player: Query<&Transform, With<Player>>,
-    mut q_enemies: Query<(&mut Transform, &Enemy, &EnemyArcher), Without<Player>>,
+    mut q_enemies: Query<(&mut Transform, &EnemyArcher), Without<Player>>,
 ) {
     let player_pos = match q_player.get_single() {
         Ok(r) => r.translation,
         Err(_) => return,
     };
 
-    for (mut transform, enemy, archer) in &mut q_enemies {
-        if enemy.disabled || enemy.stunned {
-            continue;
-        }
+    for (mut transform, archer) in &mut q_enemies {
         if archer.state != ArcherState::Moving {
             continue;
         }
@@ -34,6 +43,6 @@ pub struct EnemyArcherMovementPlugin;
 
 impl Plugin for EnemyArcherMovementPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (move_archers,));
+        app.add_systems(Update, (trigger_moving, move_archers));
     }
 }
