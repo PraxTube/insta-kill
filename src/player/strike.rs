@@ -17,13 +17,14 @@ use super::{
 
 const OFFSET: Vec3 = Vec3::new(0.0, -10.0, 0.0);
 const CHAIN_COOLDOWN: f32 = 0.5;
-const CHAIN_STRIKE_COOLDOWN: f32 = 0.0;
 const STRIKE_COOLDOWN: f32 = 0.2;
+const STRIKE_CHAIN_COUNT: usize = 3;
 
 #[derive(Resource, Default)]
 struct StrikeCooldown {
     absolute_cooldown: Timer,
     chain_cooldown: Timer,
+    strike_index: usize,
 }
 
 #[derive(Component)]
@@ -62,6 +63,13 @@ fn spawn_strikes(
         let mut animator = AnimationPlayer2D::default();
         animator.play(assets.player_strike_animations[0].clone());
 
+        let flip_y = ev.strike_index % 2 == 1;
+        let scale = if ev.strike_index == STRIKE_CHAIN_COUNT - 1 {
+            Vec3::splat(2.0)
+        } else {
+            Vec3::splat(1.5)
+        };
+
         let collider = commands
             .spawn((
                 StrikeCollider::default(),
@@ -84,9 +92,10 @@ fn spawn_strikes(
                 YSort(1.0),
                 animator,
                 SpriteSheetBundle {
+                    transform: Transform::from_scale(scale),
                     texture_atlas: assets.player_strike.clone(),
                     sprite: TextureAtlasSprite {
-                        flip_y: ev.strike_index != 0,
+                        flip_y,
                         ..default()
                     },
                     ..default()
@@ -128,34 +137,35 @@ fn trigger_strike(
 
     let rot = quat_from_vec2(mouse_coords.0 - player_transform.translation.truncate());
 
-    if player_input.attack {
-        // This is the first strike
-        if strike_cooldown.chain_cooldown.finished() {
-            strike_cooldown
-                .chain_cooldown
-                .set_duration(Duration::from_secs_f32(CHAIN_COOLDOWN));
-            strike_cooldown.chain_cooldown.reset();
+    if !player_input.attack {
+        return;
+    }
 
-            strike_cooldown
-                .absolute_cooldown
-                .set_duration(Duration::from_secs_f32(CHAIN_STRIKE_COOLDOWN));
-            strike_cooldown.absolute_cooldown.reset();
+    ev_spawn_strike.send(SpawnStrike {
+        rot,
+        strike_index: strike_cooldown.strike_index,
+    });
+    strike_cooldown.strike_index += 1;
 
-            ev_spawn_strike.send(SpawnStrike {
-                rot,
-                strike_index: 0,
-            });
-        } else {
-            strike_cooldown
-                .absolute_cooldown
-                .set_duration(Duration::from_secs_f32(STRIKE_COOLDOWN));
-            strike_cooldown.absolute_cooldown.reset();
+    strike_cooldown
+        .chain_cooldown
+        .set_duration(Duration::from_secs_f32(CHAIN_COOLDOWN));
+    strike_cooldown.chain_cooldown.reset();
 
-            ev_spawn_strike.send(SpawnStrike {
-                rot,
-                strike_index: 1,
-            });
-        }
+    // Reached the last strike in the striking chain
+    if strike_cooldown.strike_index == STRIKE_CHAIN_COUNT {
+        strike_cooldown.strike_index = 0;
+
+        strike_cooldown
+            .absolute_cooldown
+            .set_duration(Duration::from_secs_f32(STRIKE_COOLDOWN));
+        strike_cooldown.absolute_cooldown.reset();
+    }
+}
+
+fn reset_chain(mut strike_cooldown: ResMut<StrikeCooldown>) {
+    if strike_cooldown.chain_cooldown.finished() {
+        strike_cooldown.strike_index = 0;
     }
 }
 
@@ -187,6 +197,7 @@ impl Plugin for PlayerStrikePlugin {
                 spawn_strikes,
                 despawn_strikes,
                 trigger_strike,
+                reset_chain,
                 tick_strike_cooldown,
                 tick_strike_collider_timers,
             )

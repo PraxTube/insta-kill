@@ -24,7 +24,7 @@ fn spawn_player(mut commands: Commands, assets: Res<GameAssets>) {
     let collider = commands
         .spawn((
             PlayerCollider,
-            Collider::ball(8.0),
+            Collider::ball(4.0),
             ActiveEvents::COLLISION_EVENTS,
             CollisionGroups::default(),
             TransformBundle::from_transform(Transform::from_translation(PLAYER_HITBOX_OFFSET)),
