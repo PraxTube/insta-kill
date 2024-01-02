@@ -7,6 +7,7 @@ mod map;
 mod restart;
 
 pub use camera::MainCamera;
+#[allow(unused_imports)]
 pub use camera_shake::CameraShake;
 
 use bevy::prelude::*;
