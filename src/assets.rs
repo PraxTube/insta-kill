@@ -22,6 +22,9 @@ pub struct GameAssets {
     )]
     pub player_animations: Vec<Handle<AnimationClip2D>>,
 
+    #[asset(path = "player/player_shadow.png")]
+    pub player_shadow: Handle<Image>,
+
     #[asset(texture_atlas(tile_size_x = 80.0, tile_size_y = 80.0, columns = 3, rows = 1))]
     #[asset(path = "player/player_strike.png")]
     pub player_strike: Handle<TextureAtlas>,
@@ -34,8 +37,14 @@ pub struct GameAssets {
     #[asset(paths("player/player_hook.trickfilm#main"), collection(typed))]
     pub player_hook_animations: Vec<Handle<AnimationClip2D>>,
 
-    #[asset(path = "player/player_shadow.png")]
-    pub player_shadow: Handle<Image>,
+    #[asset(texture_atlas(tile_size_x = 80.0, tile_size_y = 16.0, columns = 1, rows = 3))]
+    #[asset(path = "player/player_reflection_projectile.png")]
+    pub player_reflection_projectile: Handle<TextureAtlas>,
+    #[asset(
+        paths("player/player_reflection_projectile.trickfilm#main"),
+        collection(typed)
+    )]
+    pub player_reflection_projectile_animations: Vec<Handle<AnimationClip2D>>,
 
     // --- ENEMY ---
     #[asset(texture_atlas(tile_size_x = 34.0, tile_size_y = 34.0, columns = 7, rows = 1))]

@@ -2,6 +2,8 @@ mod movement;
 mod shooting;
 mod spawn;
 
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_trickfilm::prelude::*;
 
@@ -48,10 +50,14 @@ pub struct EnemyArcher {
 
 impl Default for EnemyArcher {
     fn default() -> Self {
+        let mut moving_cooldown = Timer::from_seconds(1.0, TimerMode::Once);
+        moving_cooldown.set_elapsed(Duration::from_secs_f32(1.0));
+        let mut shooting_cooldown = Timer::from_seconds(SHOOT_COOLDOWN, TimerMode::Once);
+        shooting_cooldown.set_elapsed(Duration::from_secs_f32(SHOOT_COOLDOWN));
         Self {
             state: ArcherState::default(),
-            moving_cooldown: Timer::from_seconds(1.0, TimerMode::Once),
-            shooting_cooldown: Timer::from_seconds(SHOOT_COOLDOWN, TimerMode::Once),
+            moving_cooldown,
+            shooting_cooldown,
         }
     }
 }

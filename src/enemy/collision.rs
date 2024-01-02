@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::player::{dash::DashLanding, spawn::PlayerDashColliderContainer, strike::Strike};
+use crate::player::{
+    dash::DashLanding, reflection_projectile::SpawnReflectionProjectile,
+    spawn::PlayerDashColliderContainer, strike::Strike,
+};
 
 use super::{Enemy, EnemyProjectile};
 
@@ -47,10 +50,11 @@ fn player_strike_collisions(
 }
 
 fn projectile_strike_collisions(
-    q_strikes: Query<&Strike>,
-    mut q_enemy_projectiles: Query<&mut EnemyProjectile>,
+    q_strikes: Query<(&Transform, &Strike)>,
+    mut q_enemy_projectiles: Query<(&Transform, &mut EnemyProjectile), Without<Strike>>,
     q_colliders: Query<&Parent, (With<Collider>, Without<EnemyProjectile>, Without<Strike>)>,
     mut ev_collision_events: EventReader<CollisionEvent>,
+    mut ev_spawn_reflection_projectile: EventWriter<SpawnReflectionProjectile>,
 ) {
     for ev in ev_collision_events.read() {
         let (source, target) = match ev {
@@ -67,15 +71,16 @@ fn projectile_strike_collisions(
             Err(_) => continue,
         };
 
-        let mut enemy_projectile = if let Ok(r) = q_enemy_projectiles.get_mut(source_parent) {
-            r
-        } else if let Ok(r) = q_enemy_projectiles.get_mut(target_parent) {
-            r
-        } else {
-            continue;
-        };
+        let (projectile_transform, mut enemy_projectile) =
+            if let Ok(r) = q_enemy_projectiles.get_mut(source_parent) {
+                r
+            } else if let Ok(r) = q_enemy_projectiles.get_mut(target_parent) {
+                r
+            } else {
+                continue;
+            };
 
-        let _ = if let Ok(r) = q_strikes.get(source_parent) {
+        let (strike_transform, _) = if let Ok(r) = q_strikes.get(source_parent) {
             r
         } else if let Ok(r) = q_strikes.get(target_parent) {
             r
@@ -83,7 +88,11 @@ fn projectile_strike_collisions(
             continue;
         };
 
-        enemy_projectile.reflected = true;
+        enemy_projectile.disabled = true;
+        ev_spawn_reflection_projectile.send(SpawnReflectionProjectile {
+            pos: projectile_transform.translation.truncate(),
+            dir: strike_transform.local_x().truncate(),
+        })
     }
 }
 

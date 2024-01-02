@@ -24,9 +24,23 @@ fn despawn_enemies(
     }
 }
 
+fn despawn_projectiles(mut commands: Commands, q_projectiles: Query<(Entity, &EnemyProjectile)>) {
+    for (entity, enemy_projectile) in &q_projectiles {
+        if enemy_projectile.disabled {
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
 fn disable_enemies(mut q_enemies: Query<&mut Enemy>) {
     for mut enemy in &mut q_enemies {
         enemy.disabled = true;
+    }
+}
+
+fn disabled_projectiles(mut q_projectiles: Query<&mut EnemyProjectile>) {
+    for mut projectile in &mut q_projectiles {
+        projectile.disabled = true;
     }
 }
 
@@ -44,14 +58,6 @@ fn adjust_sprite_flip(
     }
 }
 
-fn despawn_projectiles(mut commands: Commands, q_projectiles: Query<(Entity, &EnemyProjectile)>) {
-    for (entity, enemy_projectile) in &q_projectiles {
-        if enemy_projectile.reflected {
-            commands.entity(entity).despawn_recursive();
-        }
-    }
-}
-
 pub struct EnemySpawnPlugin;
 
 impl Plugin for EnemySpawnPlugin {
@@ -62,6 +68,9 @@ impl Plugin for EnemySpawnPlugin {
                 (adjust_sprite_flip,).run_if(in_state(GameState::Gaming)),
             )
             .add_systems(Update, (despawn_enemies, despawn_projectiles))
-            .add_systems(OnEnter(GameState::Restart), disable_enemies);
+            .add_systems(
+                OnEnter(GameState::Restart),
+                (disable_enemies, disabled_projectiles),
+            );
     }
 }

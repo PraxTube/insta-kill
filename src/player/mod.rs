@@ -1,6 +1,7 @@
 pub mod dash;
 pub mod hook;
 pub mod input;
+pub mod reflection_projectile;
 pub mod spawn;
 pub mod speed_timer;
 pub mod state;
@@ -36,6 +37,7 @@ impl Plugin for PlayerPlugin {
             speed_timer::SpeedTimerPlugin,
             dash::PlayerDashPlugin,
             hook::PlayerHookPlugin,
+            reflection_projectile::PlayerReflectionProjectilePlugin,
         ));
     }
 }
