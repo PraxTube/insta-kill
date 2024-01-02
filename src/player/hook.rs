@@ -31,6 +31,7 @@ fn trigger_hook(player_input: Res<PlayerInput>, mut q_player: Query<&mut Player>
 
     if player_input.hook {
         player.state = PlayerState::Hooking;
+        player.hook_target_pos = Vec2::ZERO;
     }
 }
 

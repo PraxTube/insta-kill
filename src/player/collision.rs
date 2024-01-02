@@ -83,10 +83,14 @@ fn enemy_projectile_collisions(
             continue;
         };
 
-        let _ = match q_enemy_projectiles.get(enemy_parent.get()) {
+        let projectile = match q_enemy_projectiles.get(enemy_parent.get()) {
             Ok(r) => r,
             Err(_) => continue,
         };
+
+        if projectile.disabled {
+            continue;
+        }
 
         player.disabled = true;
     }
@@ -104,6 +108,10 @@ fn hook_enemy_collision(
         Err(_) => return,
     };
     if player.state == PlayerState::Dashing {
+        return;
+    }
+    // We already hooked an enemy, don't check for any further collisions.
+    if player.hook_target_pos != Vec2::ZERO {
         return;
     }
 

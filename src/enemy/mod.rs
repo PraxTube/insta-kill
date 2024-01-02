@@ -28,5 +28,5 @@ pub struct Enemy {
 
 #[derive(Component, Default)]
 pub struct EnemyProjectile {
-    disabled: bool,
+    pub disabled: bool,
 }

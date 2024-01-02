@@ -11,7 +11,7 @@
     ),
     (
         name: "shooting",
-        keyframes: KeyframesRange((start: 16, end: 32)),
+        keyframes: KeyframesRange((start: 16, end: 30)),
         duration: 2.0,
     ),
     (
