@@ -27,4 +27,6 @@ pub struct Enemy {
 }
 
 #[derive(Component, Default)]
-pub struct EnemyProjectile {}
+pub struct EnemyProjectile {
+    reflected: bool,
+}

@@ -3,7 +3,7 @@ use bevy_rapier2d::prelude::*;
 
 use crate::player::{dash::DashLanding, spawn::PlayerDashColliderContainer, strike::Strike};
 
-use super::Enemy;
+use super::{Enemy, EnemyProjectile};
 
 fn player_strike_collisions(
     q_strikes: Query<&Strike>,
@@ -43,6 +43,47 @@ fn player_strike_collisions(
         };
 
         enemy.disabled = true;
+    }
+}
+
+fn projectile_strike_collisions(
+    q_strikes: Query<&Strike>,
+    mut q_enemy_projectiles: Query<&mut EnemyProjectile>,
+    q_colliders: Query<&Parent, (With<Collider>, Without<EnemyProjectile>, Without<Strike>)>,
+    mut ev_collision_events: EventReader<CollisionEvent>,
+) {
+    for ev in ev_collision_events.read() {
+        let (source, target) = match ev {
+            CollisionEvent::Started(source, target, _) => (source, target),
+            CollisionEvent::Stopped(_, _, _) => continue,
+        };
+
+        let source_parent = match q_colliders.get(*source) {
+            Ok(p) => p.get(),
+            Err(_) => continue,
+        };
+        let target_parent = match q_colliders.get(*target) {
+            Ok(p) => p.get(),
+            Err(_) => continue,
+        };
+
+        let mut enemy_projectile = if let Ok(r) = q_enemy_projectiles.get_mut(source_parent) {
+            r
+        } else if let Ok(r) = q_enemy_projectiles.get_mut(target_parent) {
+            r
+        } else {
+            continue;
+        };
+
+        let _ = if let Ok(r) = q_strikes.get(source_parent) {
+            r
+        } else if let Ok(r) = q_strikes.get(target_parent) {
+            r
+        } else {
+            continue;
+        };
+
+        enemy_projectile.reflected = true;
     }
 }
 
@@ -143,6 +184,7 @@ impl Plugin for EnemyCollisionPlugin {
             Update,
             (
                 player_strike_collisions,
+                projectile_strike_collisions,
                 player_dash_collisions,
                 player_dash_landing_collisions,
             ),

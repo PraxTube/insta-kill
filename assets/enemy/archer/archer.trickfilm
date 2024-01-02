@@ -11,8 +11,8 @@
     ),
     (
         name: "shooting",
-        keyframes: KeyframesRange((start: 24, end: 31)),
-        duration: 0.8,
+        keyframes: KeyframesRange((start: 16, end: 32)),
+        duration: 2.0,
     ),
     (
         name: "stunned",

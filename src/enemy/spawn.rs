@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{player::Player, GameState};
 
-use super::Enemy;
+use super::{Enemy, EnemyProjectile};
 
 #[derive(Event)]
 pub struct DespawnEnemy {
@@ -44,6 +44,14 @@ fn adjust_sprite_flip(
     }
 }
 
+fn despawn_projectiles(mut commands: Commands, q_projectiles: Query<(Entity, &EnemyProjectile)>) {
+    for (entity, enemy_projectile) in &q_projectiles {
+        if enemy_projectile.reflected {
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
 pub struct EnemySpawnPlugin;
 
 impl Plugin for EnemySpawnPlugin {
@@ -53,7 +61,7 @@ impl Plugin for EnemySpawnPlugin {
                 Update,
                 (adjust_sprite_flip,).run_if(in_state(GameState::Gaming)),
             )
-            .add_systems(Update, (despawn_enemies,))
+            .add_systems(Update, (despawn_enemies, despawn_projectiles))
             .add_systems(OnEnter(GameState::Restart), disable_enemies);
     }
 }

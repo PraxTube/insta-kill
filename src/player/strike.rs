@@ -66,7 +66,7 @@ fn spawn_strikes(
             .spawn((
                 StrikeCollider::default(),
                 Sensor,
-                Collider::capsule(Vec2::new(0.0, 15.0), Vec2::new(0.0, -15.0), 15.0),
+                Collider::capsule(Vec2::new(0.0, 15.0), Vec2::new(0.0, -15.0), 18.0),
                 CollisionGroups::default(),
                 TransformBundle::from_transform(Transform::from_translation(Vec3::new(
                     25.0, 0.0, 0.0,

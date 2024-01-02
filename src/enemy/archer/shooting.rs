@@ -10,6 +10,7 @@ use crate::{
 use super::{ArcherState, EnemyArcher, SHOOT_RANGE};
 
 const PROJECTILE_SPEED: f32 = 500.0;
+const OFFSET: f32 = 50.0;
 
 #[derive(Component)]
 struct Projectile;
@@ -54,12 +55,15 @@ fn spawn_projectiles(
         }
 
         let rot = quat_from_vec3(player_pos - archer_transform.translation);
-        let transform =
-            Transform::from_translation(archer_transform.translation).with_rotation(rot);
+        let transform = Transform::from_translation(
+            archer_transform.translation + rot.mul_vec3(Vec3::X) * OFFSET,
+        )
+        .with_rotation(rot);
 
         let collider = commands
             .spawn((
                 Sensor,
+                ActiveEvents::COLLISION_EVENTS,
                 Collider::cuboid(10.0, 4.0),
                 CollisionGroups::default(),
                 TransformBundle::from_transform(Transform::from_translation(Vec3::new(
@@ -80,6 +84,7 @@ fn spawn_projectiles(
                 },
             ))
             .push_children(&[collider]);
+
         archer.shooting_cooldown.reset();
         archer.moving_cooldown.reset();
         archer.state = ArcherState::Idling;

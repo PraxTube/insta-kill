@@ -44,7 +44,7 @@ fn spawn_enemies(
 
     let collider = commands
         .spawn((
-            Collider::capsule(Vec2::new(10.0, 0.0), Vec2::new(-10.0, 0.0), 7.0),
+            Collider::capsule(Vec2::new(10.0, 0.0), Vec2::new(-8.0, 0.0), 7.0),
             ActiveEvents::COLLISION_EVENTS,
             CollisionGroups::default(),
             TransformBundle::from_transform(
