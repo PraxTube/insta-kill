@@ -25,7 +25,10 @@ fn trigger_hook(player_input: Res<PlayerInput>, mut q_player: Query<&mut Player>
         Err(_) => return,
     };
 
-    if player.state == PlayerState::Hooking || player.state == PlayerState::Dashing {
+    if player.state == PlayerState::Hooking
+        || player.state == PlayerState::Dashing
+        || player.state == PlayerState::Sliding
+    {
         return;
     }
 
