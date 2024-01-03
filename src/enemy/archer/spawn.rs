@@ -6,11 +6,12 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use bevy_trickfilm::prelude::*;
 
-use crate::{player::Player, utils::quat_from_vec2, world::camera::YSort, GameAssets, GameState};
+use crate::{
+    enemy::spawn::SPAWN_OFFSET, player::Player, utils::quat_from_vec2, world::camera::YSort,
+    GameAssets, GameState,
+};
 
 use super::{ArcherState, Enemy, EnemyArcher};
-
-const OFFSET: f32 = 1000.0;
 
 #[derive(Resource)]
 struct EnemySpawnCooldown {
@@ -40,7 +41,7 @@ fn spawn_enemies(
         .repeat();
 
     let pos = player_transform.translation
-        + Quat::from_rotation_z(rng.gen_range(0.0..TAU)).mul_vec3(Vec3::X) * OFFSET;
+        + Quat::from_rotation_z(rng.gen_range(0.0..TAU)).mul_vec3(Vec3::X) * SPAWN_OFFSET;
 
     let collider = commands
         .spawn((

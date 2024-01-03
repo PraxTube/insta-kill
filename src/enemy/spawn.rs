@@ -4,6 +4,9 @@ use crate::{player::Player, GameState};
 
 use super::{Enemy, EnemyProjectile};
 
+pub const SPAWN_OFFSET: f32 = 900.0;
+const MAX_PLAYER_DISTANCE: f32 = 1200.0;
+
 #[derive(Event)]
 pub struct DespawnEnemy {
     pub pos: Vec2,
@@ -58,6 +61,31 @@ fn adjust_sprite_flip(
     }
 }
 
+fn redeploy_enemies(
+    q_player: Query<&Transform, With<Player>>,
+    mut q_enemies: Query<&mut Transform, (With<Enemy>, Without<Player>)>,
+) {
+    let player_transform = match q_player.get_single() {
+        Ok(r) => r,
+        Err(_) => return,
+    };
+
+    for mut enemy_transform in &mut q_enemies {
+        if enemy_transform
+            .translation
+            .truncate()
+            .distance_squared(player_transform.translation.truncate())
+            >= MAX_PLAYER_DISTANCE.powi(2)
+        {
+            let dir = (player_transform.translation - enemy_transform.translation)
+                .truncate()
+                .normalize_or_zero();
+            enemy_transform.translation =
+                player_transform.translation + dir.extend(0.0) * SPAWN_OFFSET;
+        }
+    }
+}
+
 pub struct EnemySpawnPlugin;
 
 impl Plugin for EnemySpawnPlugin {
@@ -65,7 +93,7 @@ impl Plugin for EnemySpawnPlugin {
         app.add_event::<DespawnEnemy>()
             .add_systems(
                 Update,
-                (adjust_sprite_flip,).run_if(in_state(GameState::Gaming)),
+                (adjust_sprite_flip, redeploy_enemies).run_if(in_state(GameState::Gaming)),
             )
             .add_systems(Update, (despawn_enemies, despawn_projectiles))
             .add_systems(
