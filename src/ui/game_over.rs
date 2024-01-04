@@ -92,9 +92,9 @@ fn despawn_game_over_screens(
     }
 }
 
-pub struct GameOverUiPlugin;
+pub struct GameOverPlugin;
 
-impl Plugin for GameOverUiPlugin {
+impl Plugin for GameOverPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::GameOver), (spawn_game_over_screen,))
             .add_systems(OnExit(GameState::Restart), despawn_game_over_screens);
