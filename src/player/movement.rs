@@ -43,7 +43,7 @@ fn slide_player(mut q_player: Query<(&Transform, &mut Velocity, &mut Player)>) {
         Err(_) => return,
     };
 
-    if player.state != PlayerState::Sliding || player.state == PlayerState::Dashing {
+    if player.state != PlayerState::Sliding {
         return;
     }
     if (transform.translation + PLAYER_HITBOX_OFFSET)

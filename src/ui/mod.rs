@@ -1,6 +1,6 @@
 mod combo_bar;
-mod death_counter;
 mod game_over;
+mod kill_counter;
 
 use bevy::prelude::*;
 
@@ -11,7 +11,7 @@ impl Plugin for UiPlugin {
         app.add_plugins((
             game_over::GameOverPlugin,
             combo_bar::ComboBarPlugin,
-            death_counter::DeathCounterPlugin,
+            kill_counter::KillCounterPlugin,
         ));
     }
 }

@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{player::speed_timer::SpeedTimer, GameAssets, GameState};
+use crate::{
+    player::{kill_counter::KillCounter, speed_timer::SpeedTimer},
+    GameAssets, GameState,
+};
 
 #[derive(Component)]
 struct GameOverScreen;
@@ -50,16 +53,28 @@ fn spawn_time(commands: &mut Commands, font: Handle<Font>, time: f32) -> Entity 
     commands.spawn((GameOverScreen, text_bundle)).id()
 }
 
-fn spawn_text(commands: &mut Commands, font: Handle<Font>, time: f32) {
+fn spawn_kill_counter(commands: &mut Commands, font: Handle<Font>, kills: u32) -> Entity {
+    let text = format!("KILLS: {}", kills);
+    let text_style = TextStyle {
+        font,
+        font_size: 50.0,
+        color: Color::WHITE,
+    };
+    let text_bundle = TextBundle::from_sections([TextSection::new(text, text_style.clone())]);
+    commands.spawn((GameOverScreen, text_bundle)).id()
+}
+
+fn spawn_text(commands: &mut Commands, font: Handle<Font>, time: f32, kills: u32) {
     let title_text = spawn_title(commands, font.clone());
     let time_text = spawn_time(commands, font.clone(), time);
+    let kill_text = spawn_kill_counter(commands, font.clone(), kills);
 
     commands
         .spawn((
             GameOverScreen,
             NodeBundle {
                 style: Style {
-                    top: Val::Percent(30.0),
+                    top: Val::Percent(25.0),
                     width: Val::Percent(100.0),
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Vh(10.0),
@@ -71,16 +86,22 @@ fn spawn_text(commands: &mut Commands, font: Handle<Font>, time: f32) {
                 ..default()
             },
         ))
-        .push_children(&[title_text, time_text]);
+        .push_children(&[title_text, time_text, kill_text]);
 }
 
 fn spawn_game_over_screen(
     mut commands: Commands,
     assets: Res<GameAssets>,
     speed_timer: Res<SpeedTimer>,
+    kill_counter: Res<KillCounter>,
 ) {
     spawn_background(&mut commands, assets.white_pixel.clone());
-    spawn_text(&mut commands, assets.font.clone(), speed_timer.elapsed);
+    spawn_text(
+        &mut commands,
+        assets.font.clone(),
+        speed_timer.elapsed,
+        kill_counter.kills(),
+    );
 }
 
 fn despawn_game_over_screens(

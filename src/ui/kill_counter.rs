@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{player::death_counter::DeathCounter, GameAssets, GameState};
+use crate::{player::kill_counter::KillCounter, GameAssets, GameState};
 
 const SIZE: f32 = 32.0;
 
@@ -17,6 +17,10 @@ fn spawn_combo_bar(mut commands: Commands, assets: Res<GameAssets>) {
                 style: Style {
                     width: Val::Px(SIZE),
                     height: Val::Px(SIZE),
+                    margin: UiRect {
+                        right: Val::Px(10.0),
+                        ..default()
+                    },
                     ..default()
                 },
                 image: UiImage {
@@ -68,7 +72,7 @@ fn despawn_combo_bar(mut commands: Commands, q_counters: Query<Entity, With<Coun
 }
 
 fn update_counter_text(
-    death_counter: Res<DeathCounter>,
+    death_counter: Res<KillCounter>,
     mut q_counter_text: Query<&mut Text, With<CounterText>>,
 ) {
     let mut text = match q_counter_text.get_single_mut() {
@@ -79,9 +83,9 @@ fn update_counter_text(
     text.sections[0].value = death_counter.kills().to_string();
 }
 
-pub struct DeathCounterPlugin;
+pub struct KillCounterPlugin;
 
-impl Plugin for DeathCounterPlugin {
+impl Plugin for KillCounterPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,

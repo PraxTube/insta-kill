@@ -1,8 +1,8 @@
 pub mod combo;
 pub mod dash;
-pub mod death_counter;
 pub mod hook;
 pub mod input;
+pub mod kill_counter;
 pub mod reflection_projectile;
 pub mod spawn;
 pub mod speed_timer;
@@ -41,7 +41,7 @@ impl Plugin for PlayerPlugin {
             hook::PlayerHookPlugin,
             reflection_projectile::PlayerReflectionProjectilePlugin,
             combo::PlayerComboPlugin,
-            death_counter::PlayerDeathCounterPlugin,
+            kill_counter::PlayerKillCounterPlugin,
         ));
     }
 }

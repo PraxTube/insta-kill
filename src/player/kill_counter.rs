@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 
 #[derive(Resource, Default)]
-pub struct DeathCounter {
+pub struct KillCounter {
     kills: u32,
 }
 
-impl DeathCounter {
+impl KillCounter {
     pub fn increase(&mut self) {
         self.kills += 1;
     }
@@ -15,10 +15,10 @@ impl DeathCounter {
     }
 }
 
-pub struct PlayerDeathCounterPlugin;
+pub struct PlayerKillCounterPlugin;
 
-impl Plugin for PlayerDeathCounterPlugin {
+impl Plugin for PlayerKillCounterPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<DeathCounter>();
+        app.init_resource::<KillCounter>();
     }
 }

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    player::{combo::ComboMeter, death_counter::DeathCounter, Player},
+    player::{combo::ComboMeter, kill_counter::KillCounter, Player},
     GameState,
 };
 
@@ -18,7 +18,7 @@ pub struct DespawnEnemy {
 fn despawn_enemies(
     mut commands: Commands,
     mut combo_meter: ResMut<ComboMeter>,
-    mut death_counter: ResMut<DeathCounter>,
+    mut death_counter: ResMut<KillCounter>,
     q_enemies: Query<(Entity, &Transform, &Enemy)>,
     mut ev_despawn_enemy: EventWriter<DespawnEnemy>,
 ) {
