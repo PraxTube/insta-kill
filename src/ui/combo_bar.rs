@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 
-use crate::{player::combo::ComboMeter, GameState};
+use crate::{player::combo::ComboMeter, GameAssets, GameState};
 
 #[derive(Component)]
 struct ComboBarContainer;
 #[derive(Component)]
 struct ComboBar;
 
-fn spawn_combo_bar(mut commands: Commands) {
+fn spawn_combo_bar(mut commands: Commands, assets: Res<GameAssets>) {
     let combo_bar = commands
         .spawn((
             ComboBar,
@@ -17,6 +17,8 @@ fn spawn_combo_bar(mut commands: Commands) {
                     width: Val::Percent(100.0),
                     ..default()
                 },
+                background_color: BackgroundColor(Color::PURPLE),
+                z_index: ZIndex::Global(-1),
                 ..default()
             },
         ))
@@ -25,13 +27,17 @@ fn spawn_combo_bar(mut commands: Commands) {
     commands
         .spawn((
             ComboBarContainer,
-            NodeBundle {
+            ImageBundle {
                 style: Style {
                     left: Val::Px(20.0),
                     top: Val::Percent(25.0),
                     height: Val::Percent(50.0),
                     width: Val::Percent(5.0),
                     align_items: AlignItems::End,
+                    ..default()
+                },
+                image: UiImage {
+                    texture: assets.combo_bar_container.clone(),
                     ..default()
                 },
                 ..default()

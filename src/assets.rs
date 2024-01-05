@@ -96,6 +96,12 @@ pub struct GameAssets {
     #[asset(path = "ui/white_pixel.png")]
     pub white_pixel: Handle<Image>,
 
+    #[asset(path = "ui/combo_bar_container.png")]
+    pub combo_bar_container: Handle<Image>,
+
+    #[asset(path = "ui/death_counter_icon.png")]
+    pub death_counter_icon: Handle<Image>,
+
     // --- FONT ---
     #[asset(path = "fonts/PressStart2P.ttf")]
     pub font: Handle<Font>,

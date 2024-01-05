@@ -1,5 +1,6 @@
 pub mod combo;
 pub mod dash;
+pub mod death_counter;
 pub mod hook;
 pub mod input;
 pub mod reflection_projectile;
@@ -40,6 +41,7 @@ impl Plugin for PlayerPlugin {
             hook::PlayerHookPlugin,
             reflection_projectile::PlayerReflectionProjectilePlugin,
             combo::PlayerComboPlugin,
+            death_counter::PlayerDeathCounterPlugin,
         ));
     }
 }

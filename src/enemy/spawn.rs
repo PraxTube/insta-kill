@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    player::{combo::ComboMeter, Player},
+    player::{combo::ComboMeter, death_counter::DeathCounter, Player},
     GameState,
 };
 
@@ -18,12 +18,14 @@ pub struct DespawnEnemy {
 fn despawn_enemies(
     mut commands: Commands,
     mut combo_meter: ResMut<ComboMeter>,
+    mut death_counter: ResMut<DeathCounter>,
     q_enemies: Query<(Entity, &Transform, &Enemy)>,
     mut ev_despawn_enemy: EventWriter<DespawnEnemy>,
 ) {
     for (entity, transform, enemy) in &q_enemies {
         if enemy.disabled {
             combo_meter.increase(5.0);
+            death_counter.increase();
             ev_despawn_enemy.send(DespawnEnemy {
                 pos: transform.translation.truncate(),
             });
@@ -40,15 +42,18 @@ fn despawn_projectiles(mut commands: Commands, q_projectiles: Query<(Entity, &En
     }
 }
 
-fn disable_enemies(mut q_enemies: Query<&mut Enemy>) {
-    for mut enemy in &mut q_enemies {
-        enemy.disabled = true;
+fn despawn_all_enemies(mut commands: Commands, q_enemies: Query<Entity, With<Enemy>>) {
+    for entity in &q_enemies {
+        commands.entity(entity).despawn_recursive();
     }
 }
 
-fn disabled_projectiles(mut q_projectiles: Query<&mut EnemyProjectile>) {
-    for mut projectile in &mut q_projectiles {
-        projectile.disabled = true;
+fn despawn_all_projectiles(
+    mut commands: Commands,
+    q_projectiles: Query<Entity, With<EnemyProjectile>>,
+) {
+    for entity in &q_projectiles {
+        commands.entity(entity).despawn_recursive();
     }
 }
 
@@ -103,7 +108,7 @@ impl Plugin for EnemySpawnPlugin {
             .add_systems(Update, (despawn_enemies, despawn_projectiles))
             .add_systems(
                 OnEnter(GameState::Restart),
-                (disable_enemies, disabled_projectiles),
+                (despawn_all_enemies, despawn_all_projectiles),
             );
     }
 }

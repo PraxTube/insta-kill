@@ -40,6 +40,10 @@ https://bdragon1727.itch.io/free-smoke-fx-pixel-2
 
 https://cazwolf.itch.io/caz-pixel-free
 
+### Death Counter Icon
+
+https://frodoundead.itch.io/skull-bones
+
 ---
 
 ## Audio

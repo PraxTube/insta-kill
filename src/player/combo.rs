@@ -3,18 +3,12 @@ use bevy::prelude::*;
 use crate::GameState;
 
 /// Combo progress lost each second in percent.
-const COMBO_DECAY: f32 = 20.0;
+const COMBO_DECAY: f32 = 5.0;
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct ComboMeter {
     /// Float between 0.0 and 100.0, indicating the combo progress in percent.
     progress: f32,
-}
-
-impl Default for ComboMeter {
-    fn default() -> Self {
-        Self { progress: 100.0 }
-    }
 }
 
 impl ComboMeter {
