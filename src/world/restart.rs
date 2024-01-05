@@ -1,9 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    player::{
-        combo::ComboMeter, input::PlayerInput, kill_counter::KillCounter, speed_timer::SpeedTimer,
-    },
+    player::{input::PlayerInput, kill_counter::KillCounter, speed_timer::SpeedTimer},
     GameState,
 };
 
@@ -16,13 +14,8 @@ impl Default for RestartTimer {
     }
 }
 
-fn reset_resources(
-    mut speed_timer: ResMut<SpeedTimer>,
-    mut combo_meter: ResMut<ComboMeter>,
-    mut death_counter: ResMut<KillCounter>,
-) {
+fn reset_resources(mut speed_timer: ResMut<SpeedTimer>, mut death_counter: ResMut<KillCounter>) {
     *speed_timer = SpeedTimer::default();
-    *combo_meter = ComboMeter::default();
     *death_counter = KillCounter::default();
 }
 

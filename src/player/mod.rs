@@ -1,4 +1,3 @@
-pub mod combo;
 pub mod dash;
 pub mod hook;
 pub mod input;
@@ -40,7 +39,6 @@ impl Plugin for PlayerPlugin {
             dash::PlayerDashPlugin,
             hook::PlayerHookPlugin,
             reflection_projectile::PlayerReflectionProjectilePlugin,
-            combo::PlayerComboPlugin,
             kill_counter::PlayerKillCounterPlugin,
         ));
     }
