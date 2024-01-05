@@ -1,20 +1,20 @@
 use bevy::prelude::*;
 
-use crate::{player::kill_counter::KillCounter, GameAssets, GameState};
+use crate::{player::score::PlayerScore, GameAssets, GameState};
 
 const SIZE: f32 = 32.0;
 
 #[derive(Component)]
-struct Counter;
+struct Score;
 #[derive(Component)]
-struct CounterText;
+struct ScoreText;
 
-fn spawn_counter(mut commands: Commands, assets: Res<GameAssets>) {
+fn spawn_score(mut commands: Commands, assets: Res<GameAssets>) {
     let icon = commands
         .spawn(ImageBundle {
             style: Style {
                 width: Val::Px(SIZE),
-                height: Val::Px(SIZE),
+                height: Val::Px(2.0 * SIZE),
                 margin: UiRect {
                     right: Val::Px(10.0),
                     ..default()
@@ -22,7 +22,7 @@ fn spawn_counter(mut commands: Commands, assets: Res<GameAssets>) {
                 ..default()
             },
             image: UiImage {
-                texture: assets.death_counter_icon.clone(),
+                texture: assets.score_icon.clone(),
                 ..default()
             },
             ..default()
@@ -31,7 +31,7 @@ fn spawn_counter(mut commands: Commands, assets: Res<GameAssets>) {
 
     let text = commands
         .spawn((
-            CounterText,
+            ScoreText,
             TextBundle {
                 text: Text::from_section(
                     "",
@@ -48,10 +48,10 @@ fn spawn_counter(mut commands: Commands, assets: Res<GameAssets>) {
 
     commands
         .spawn((
-            Counter,
+            Score,
             NodeBundle {
                 style: Style {
-                    top: Val::Px(40.0),
+                    top: Val::Px(120.0),
                     left: Val::Px(40.0),
                     position_type: PositionType::Absolute,
                     ..default()
@@ -62,33 +62,33 @@ fn spawn_counter(mut commands: Commands, assets: Res<GameAssets>) {
         .push_children(&[icon, text]);
 }
 
-fn despawn_counter(mut commands: Commands, q_counters: Query<Entity, With<Counter>>) {
+fn despawn_score(mut commands: Commands, q_counters: Query<Entity, With<Score>>) {
     for entity in &q_counters {
         commands.entity(entity).despawn_recursive();
     }
 }
 
-fn update_counter_text(
-    death_counter: Res<KillCounter>,
-    mut q_counter_text: Query<&mut Text, With<CounterText>>,
+fn update_score_text(
+    player_score: Res<PlayerScore>,
+    mut q_counter_text: Query<&mut Text, With<ScoreText>>,
 ) {
     let mut text = match q_counter_text.get_single_mut() {
         Ok(r) => r,
         Err(_) => return,
     };
 
-    text.sections[0].value = death_counter.kills().to_string();
+    text.sections[0].value = player_score.score().to_string();
 }
 
-pub struct KillCounterPlugin;
+pub struct ScoreUiPlugin;
 
-impl Plugin for KillCounterPlugin {
+impl Plugin for ScoreUiPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (update_counter_text,).run_if(in_state(GameState::Gaming)),
+            (update_score_text,).run_if(in_state(GameState::Gaming)),
         )
-        .add_systems(OnEnter(GameState::Gaming), (spawn_counter,))
-        .add_systems(OnExit(GameState::Gaming), (despawn_counter,));
+        .add_systems(OnEnter(GameState::Gaming), (spawn_score,))
+        .add_systems(OnExit(GameState::Gaming), (despawn_score,));
     }
 }

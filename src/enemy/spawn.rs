@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    player::{kill_counter::KillCounter, Player},
+    player::{kill_counter::KillCounter, score::PlayerScore, Player},
     GameState,
 };
 
@@ -18,12 +18,14 @@ pub struct DespawnEnemy {
 fn despawn_enemies(
     mut commands: Commands,
     mut death_counter: ResMut<KillCounter>,
+    mut player_score: ResMut<PlayerScore>,
     q_enemies: Query<(Entity, &Transform, &Enemy)>,
     mut ev_despawn_enemy: EventWriter<DespawnEnemy>,
 ) {
     for (entity, transform, enemy) in &q_enemies {
         if enemy.disabled {
             death_counter.increase();
+            player_score.add(100);
             ev_despawn_enemy.send(DespawnEnemy {
                 pos: transform.translation.truncate(),
             });

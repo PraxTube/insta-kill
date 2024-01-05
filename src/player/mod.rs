@@ -3,6 +3,7 @@ pub mod hook;
 pub mod input;
 pub mod kill_counter;
 pub mod reflection_projectile;
+pub mod score;
 pub mod spawn;
 pub mod speed_timer;
 pub mod state;
@@ -40,6 +41,7 @@ impl Plugin for PlayerPlugin {
             hook::PlayerHookPlugin,
             reflection_projectile::PlayerReflectionProjectilePlugin,
             kill_counter::PlayerKillCounterPlugin,
+            score::PlayerScorePlugin,
         ));
     }
 }

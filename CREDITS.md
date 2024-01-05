@@ -44,6 +44,10 @@ https://cazwolf.itch.io/caz-pixel-free
 
 https://frodoundead.itch.io/skull-bones
 
+### Score Icon
+
+https://grappe.itch.io/medal
+
 ---
 
 ## Audio

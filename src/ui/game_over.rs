@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    player::{kill_counter::KillCounter, speed_timer::SpeedTimer},
+    player::{kill_counter::KillCounter, score::PlayerScore, speed_timer::SpeedTimer},
     GameAssets, GameState,
 };
 
@@ -57,17 +57,29 @@ fn spawn_kill_counter(commands: &mut Commands, font: Handle<Font>, kills: u32) -
     let text = format!("KILLS: {}", kills);
     let text_style = TextStyle {
         font,
-        font_size: 50.0,
+        font_size: 30.0,
         color: Color::WHITE,
     };
     let text_bundle = TextBundle::from_sections([TextSection::new(text, text_style.clone())]);
     commands.spawn((GameOverScreen, text_bundle)).id()
 }
 
-fn spawn_text(commands: &mut Commands, font: Handle<Font>, time: f32, kills: u32) {
+fn spawn_player_score(commands: &mut Commands, font: Handle<Font>, score: u32) -> Entity {
+    let text = format!("SCORE: {}", score);
+    let text_style = TextStyle {
+        font,
+        font_size: 30.0,
+        color: Color::WHITE,
+    };
+    let text_bundle = TextBundle::from_sections([TextSection::new(text, text_style.clone())]);
+    commands.spawn((GameOverScreen, text_bundle)).id()
+}
+
+fn spawn_text(commands: &mut Commands, font: Handle<Font>, time: f32, kills: u32, score: u32) {
     let title_text = spawn_title(commands, font.clone());
     let time_text = spawn_time(commands, font.clone(), time);
     let kill_text = spawn_kill_counter(commands, font.clone(), kills);
+    let score_text = spawn_player_score(commands, font, score);
 
     commands
         .spawn((
@@ -86,7 +98,7 @@ fn spawn_text(commands: &mut Commands, font: Handle<Font>, time: f32, kills: u32
                 ..default()
             },
         ))
-        .push_children(&[title_text, time_text, kill_text]);
+        .push_children(&[title_text, time_text, kill_text, score_text]);
 }
 
 fn spawn_game_over_screen(
@@ -94,6 +106,7 @@ fn spawn_game_over_screen(
     assets: Res<GameAssets>,
     speed_timer: Res<SpeedTimer>,
     kill_counter: Res<KillCounter>,
+    player_score: Res<PlayerScore>,
 ) {
     spawn_background(&mut commands, assets.white_pixel.clone());
     spawn_text(
@@ -101,6 +114,7 @@ fn spawn_game_over_screen(
         assets.font.clone(),
         speed_timer.elapsed,
         kill_counter.kills(),
+        player_score.score(),
     );
 }
 
