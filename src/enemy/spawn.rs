@@ -106,7 +106,7 @@ fn spawn_score_text(
     for ev in ev_despawn_enemy.read() {
         ev_spawn_world_text.send(SpawnWorldText {
             pos: ev.pos.extend(0.0),
-            content: ev.enemy.score.to_string(),
+            content: format!("+{}", ev.enemy.score),
             ..default()
         });
     }

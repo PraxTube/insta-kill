@@ -79,6 +79,12 @@ fn move_player(
             (dir, 1.0)
         };
 
+        let dir = if dir == Vec2::ZERO {
+            (mouse_coords.0 - transform.translation.truncate()).normalize_or_zero()
+        } else {
+            dir
+        };
+
         transform.rotation = quat_from_vec2(dir);
         velocity.linvel = dir * DASH_MULTIPLIER * slide_multiplier * MOVE_SPEED;
     }

@@ -46,13 +46,13 @@ fn slide_player(mut q_player: Query<(&Transform, &mut Velocity, &mut Player)>) {
     if player.state != PlayerState::Sliding {
         return;
     }
+
     if (transform.translation + PLAYER_HITBOX_OFFSET)
         .truncate()
         .distance_squared(player.hook_target_pos)
         <= HOOK_SLIDE_DISTANCE.powi(2)
     {
         player.state = PlayerState::Idling;
-        return;
     }
 
     let dir = (player.hook_target_pos - transform.translation.truncate()).normalize_or_zero();
