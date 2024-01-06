@@ -1,3 +1,5 @@
+pub mod world_text;
+
 mod game_over;
 mod kill_counter;
 mod score;
@@ -12,6 +14,7 @@ impl Plugin for UiPlugin {
             game_over::GameOverPlugin,
             kill_counter::KillCounterPlugin,
             score::ScoreUiPlugin,
+            world_text::WorldTextPlugin,
         ));
     }
 }

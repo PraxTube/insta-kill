@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     player::{kill_counter::KillCounter, score::PlayerScore, Player},
+    ui::world_text::SpawnWorldText,
     GameState,
 };
 
@@ -12,6 +13,7 @@ const MAX_PLAYER_DISTANCE: f32 = 1200.0;
 
 #[derive(Event)]
 pub struct DespawnEnemy {
+    enemy: Enemy,
     pub pos: Vec2,
 }
 
@@ -25,8 +27,9 @@ fn despawn_enemies(
     for (entity, transform, enemy) in &q_enemies {
         if enemy.disabled {
             death_counter.increase();
-            player_score.add(100);
+            player_score.add(enemy.score);
             ev_despawn_enemy.send(DespawnEnemy {
+                enemy: enemy.clone(),
                 pos: transform.translation.truncate(),
             });
             commands.entity(entity).despawn_recursive();
@@ -96,6 +99,19 @@ fn redeploy_enemies(
     }
 }
 
+fn spawn_score_text(
+    mut ev_despawn_enemy: EventReader<DespawnEnemy>,
+    mut ev_spawn_world_text: EventWriter<SpawnWorldText>,
+) {
+    for ev in ev_despawn_enemy.read() {
+        ev_spawn_world_text.send(SpawnWorldText {
+            pos: ev.pos.extend(0.0),
+            content: ev.enemy.score.to_string(),
+            ..default()
+        });
+    }
+}
+
 pub struct EnemySpawnPlugin;
 
 impl Plugin for EnemySpawnPlugin {
@@ -103,7 +119,8 @@ impl Plugin for EnemySpawnPlugin {
         app.add_event::<DespawnEnemy>()
             .add_systems(
                 Update,
-                (adjust_sprite_flip, redeploy_enemies).run_if(in_state(GameState::Gaming)),
+                (adjust_sprite_flip, redeploy_enemies, spawn_score_text)
+                    .run_if(in_state(GameState::Gaming)),
             )
             .add_systems(Update, (despawn_enemies, despawn_projectiles))
             .add_systems(

@@ -51,6 +51,7 @@ fn player_strike_collisions(
         };
 
         enemy.disabled = true;
+        enemy.score = 100;
     }
 }
 
@@ -141,6 +142,7 @@ fn player_reflection_projectiles_collisions(
         };
 
         enemy.disabled = true;
+        enemy.score = 200;
     }
 }
 
@@ -189,6 +191,7 @@ fn player_dash_collisions(
         };
 
         enemy.disabled = true;
+        enemy.score = 50;
     }
 }
 
@@ -230,6 +233,7 @@ fn player_dash_landing_collisions(
         };
 
         enemy.disabled = true;
+        enemy.score = 25;
     }
 }
 

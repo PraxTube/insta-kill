@@ -112,12 +112,12 @@ fn attack(mouse_buttons: Res<Input<MouseButton>>, mut player_input: ResMut<Playe
 }
 
 fn dash(keys: Res<Input<KeyCode>>, mut player_input: ResMut<PlayerInput>) {
-    let pressed = keys.just_pressed(KeyCode::ShiftLeft) || keys.just_pressed(KeyCode::Space);
+    let pressed = keys.just_pressed(KeyCode::ShiftLeft);
     player_input.dash = pressed;
 }
 
-fn hook(mouse_buttons: Res<Input<MouseButton>>, mut player_input: ResMut<PlayerInput>) {
-    let pressed = mouse_buttons.just_pressed(MouseButton::Right);
+fn hook(keys: Res<Input<KeyCode>>, mut player_input: ResMut<PlayerInput>) {
+    let pressed = keys.just_pressed(KeyCode::Space);
     player_input.hook = pressed;
 }
 

@@ -20,10 +20,11 @@ impl Plugin for EnemyPlugin {
     }
 }
 
-#[derive(Component, Default)]
+#[derive(Component, Default, Clone)]
 pub struct Enemy {
     pub stunned: bool,
     pub disabled: bool,
+    pub score: u32,
 }
 
 #[derive(Component, Default)]
