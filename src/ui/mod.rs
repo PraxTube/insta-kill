@@ -4,6 +4,7 @@ mod game_over;
 mod kill_counter;
 mod leaderboard;
 mod score;
+mod text_field;
 
 use bevy::prelude::*;
 
@@ -17,6 +18,7 @@ impl Plugin for UiPlugin {
             score::ScoreUiPlugin,
             game_over::GameOverPlugin,
             leaderboard::LeaderboardPlugin,
+            text_field::TextFieldPlugin,
         ));
     }
 }

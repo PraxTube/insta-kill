@@ -132,6 +132,26 @@ fn handle_leaderboard_task(
     }
 }
 
+// fn spawn_restart_text(commands: &mut Commands, font: Handle<Font>) -> Entity {
+//     let text = "PRESS 'R' TO RESTART";
+//     let text_style = TextStyle {
+//         font,
+//         font_size: 30.0,
+//         color: Color::WHITE,
+//     };
+//     let text_bundle = TextBundle::from_sections([TextSection::new(text, text_style.clone())]);
+//     commands
+//         .spawn((GameOverScreen, text_bundle))
+//         .insert(Style {
+//             margin: UiRect {
+//                 bottom: Val::Px(20.0),
+//                 ..default()
+//             },
+//             ..default()
+//         })
+//         .id()
+// }
+
 pub struct LeaderboardPlugin;
 
 impl Plugin for LeaderboardPlugin {
