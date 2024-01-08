@@ -2,6 +2,7 @@ pub mod world_text;
 
 mod game_over;
 mod kill_counter;
+mod leaderboard;
 mod score;
 
 use bevy::prelude::*;
@@ -11,10 +12,11 @@ pub struct UiPlugin;
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
-            game_over::GameOverPlugin,
+            world_text::WorldTextPlugin,
             kill_counter::KillCounterPlugin,
             score::ScoreUiPlugin,
-            world_text::WorldTextPlugin,
+            game_over::GameOverPlugin,
+            leaderboard::LeaderboardPlugin,
         ));
     }
 }

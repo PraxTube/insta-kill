@@ -17,6 +17,7 @@ opt-level = 3
 chrono = "0.4.31"
 rand = "0.8.5"
 rand_xoshiro = "0.6.0"
+futures-lite = "1.13.0"
 
 bevy = "0.12.1"
 bevy_screen_diagnostics = "0.4.0"

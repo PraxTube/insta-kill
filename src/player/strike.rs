@@ -16,7 +16,7 @@ use super::{
 };
 
 const OFFSET: Vec3 = Vec3::new(0.0, -10.0, 0.0);
-const CHAIN_COOLDOWN: f32 = 0.5;
+const CHAIN_COOLDOWN: f32 = 0.35;
 const STRIKE_COOLDOWN: f32 = 0.2;
 const STRIKE_CHAIN_COUNT: usize = 3;
 

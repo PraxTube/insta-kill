@@ -2274,6 +2274,7 @@ dependencies = [
  "bevy_screen_diagnostics",
  "bevy_trickfilm",
  "chrono",
+ "futures-lite 1.13.0",
  "noisy_bevy",
  "rand",
  "rand_xoshiro",

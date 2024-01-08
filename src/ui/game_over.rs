@@ -1,12 +1,22 @@
 use bevy::prelude::*;
 
 use crate::{
-    player::{kill_counter::KillCounter, score::PlayerScore, speed_timer::SpeedTimer},
+    player::{
+        input::PlayerInput, kill_counter::KillCounter, score::PlayerScore, speed_timer::SpeedTimer,
+    },
     GameAssets, GameState,
 };
 
 #[derive(Component)]
 struct GameOverScreen;
+
+#[derive(States, Clone, Eq, PartialEq, Debug, Hash, Default)]
+pub enum GameOverState {
+    #[default]
+    GameOver,
+    Loading,
+    Leaderboard,
+}
 
 fn spawn_background(commands: &mut Commands, texture: Handle<Image>) {
     commands.spawn((
@@ -148,11 +158,29 @@ fn despawn_game_over_screens(
     }
 }
 
+fn load_leaderboard(
+    mut next_state: ResMut<NextState<GameOverState>>,
+    player_input: Res<PlayerInput>,
+) {
+    if !player_input.dash {
+        return;
+    }
+
+    next_state.set(GameOverState::Loading);
+}
+
 pub struct GameOverPlugin;
 
 impl Plugin for GameOverPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::GameOver), (spawn_game_over_screen,))
-            .add_systems(OnExit(GameState::Restart), despawn_game_over_screens);
+        app.add_state::<GameOverState>()
+            .add_systems(OnEnter(GameState::GameOver), (spawn_game_over_screen,))
+            .add_systems(OnExit(GameState::Restart), despawn_game_over_screens)
+            .add_systems(
+                Update,
+                (load_leaderboard,).run_if(
+                    in_state(GameState::GameOver).and_then(in_state(GameOverState::GameOver)),
+                ),
+            );
     }
 }
