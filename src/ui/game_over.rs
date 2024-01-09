@@ -127,6 +127,7 @@ impl Plugin for GameOverPlugin {
                 OnEnter(GameState::GameOver),
                 (spawn_game_over_screen, reset_game_over_state),
             )
+            .add_systems(OnExit(GameState::GameOver), despawn_game_over_screens)
             .add_systems(OnExit(GameOverState::GameOver), despawn_game_over_screens)
             .add_systems(OnExit(GameState::GameOver), despawn_game_over_background);
     }

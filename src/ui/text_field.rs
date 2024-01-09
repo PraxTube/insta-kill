@@ -155,14 +155,14 @@ fn update_buffer_text(
 
 fn update_cursor_text(
     mut timer: ResMut<TypingCursorTimer>,
-    mut query: Query<&mut Text, With<TypingCursor>>,
+    mut q_cursor: Query<&mut Text, With<TypingCursor>>,
     time: Res<Time>,
 ) {
     if !timer.0.tick(time.delta()).just_finished() {
         return;
     }
 
-    for mut target in query.iter_mut() {
+    for mut target in q_cursor.iter_mut() {
         if target.sections[0].style.color != Color::NONE {
             target.sections[0].style.color = Color::NONE;
         } else {
@@ -176,10 +176,14 @@ fn push_chars(
     mut submitted_text_input: EventWriter<SubmittedTextInput>,
     mut keyboard_input_events: EventReader<KeyboardInput>,
     keys: Res<Input<KeyCode>>,
+    q_input_field: Query<With<InputField>>,
 ) {
     let control_active = keys.pressed(KeyCode::ControlLeft);
 
     for ev in keyboard_input_events.read() {
+        if q_input_field.is_empty() {
+            continue;
+        }
         // We run this in the loop so that the events get consumed.
         // Otherwise we might run into the issue of added it to the buffer
         // when spawning the text field.
