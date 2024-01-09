@@ -12,57 +12,106 @@ use bevy::{
 
 use crate::{GameAssets, GameState};
 
-use super::game_over::GameOverState;
+use super::{game_over::GameOverState, text_field::SubmittedTextInput};
 
 const HOST: &str = "rancic.org";
 const PORT: &str = "3434";
 
+struct LeaderboardEntry {
+    name: String,
+    score: String,
+}
+
+#[derive(Resource)]
+struct PlayerName(String);
+#[derive(Resource, Deref, DerefMut)]
+struct LeaderboardData(Vec<LeaderboardEntry>);
+
 #[derive(Component)]
 struct Leaderboard;
-
 #[derive(Component)]
 struct FetchData(Task<String>);
 
-fn spawn_header(commands: &mut Commands, font: Handle<Font>) -> Entity {
-    fn spawn_text(commands: &mut Commands, font: Handle<Font>, text: &str) -> Entity {
-        let text_style = TextStyle {
-            font,
-            font_size: 30.0,
-            color: Color::WHITE,
-        };
+#[derive(Event)]
+struct DataFetched(String);
 
-        commands
-            .spawn(TextBundle::from_sections([TextSection::new(
-                text,
-                text_style.clone(),
-            )]))
-            .id()
-    }
-
-    let name = spawn_text(commands, font.clone(), "NAME");
-    let score = spawn_text(commands, font.clone(), "SCORE");
-    let kill = spawn_text(commands, font.clone(), "KILLS");
-    let time = spawn_text(commands, font.clone(), "TIME");
+fn spawn_text(commands: &mut Commands, font: Handle<Font>, text: &str, i: usize) -> Entity {
+    let pos = [150.0, 550.0, 750.0, 950.0];
+    let text_style = TextStyle {
+        font,
+        font_size: 30.0,
+        color: Color::WHITE,
+    };
 
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                flex_direction: FlexDirection::Row,
-                column_gap: Val::Px(50.0),
-                margin: UiRect {
-                    bottom: Val::Px(15.0),
-                    ..default()
-                },
-                ..default()
-            },
+        .spawn(TextBundle::from_sections([TextSection::new(
+            text,
+            text_style.clone(),
+        )]))
+        .insert(Style {
+            left: Val::Px(pos[i]),
+            position_type: PositionType::Absolute,
             ..default()
         })
-        .push_children(&[name, score, kill, time])
         .id()
 }
 
-fn spawn_leaderboard(mut commands: Commands, assets: Res<GameAssets>) {
+fn spawn_row(commands: &mut Commands, children: &[Entity]) -> Entity {
+    commands
+        .spawn(NodeBundle {
+            style: Style { ..default() },
+            ..default()
+        })
+        .push_children(children)
+        .id()
+}
+
+fn spawn_header(commands: &mut Commands, font: Handle<Font>) -> Entity {
+    let name = spawn_text(commands, font.clone(), "NAME", 0);
+    let score = spawn_text(commands, font.clone(), "SCORE", 1);
+    let kill = spawn_text(commands, font.clone(), "KILLS", 2);
+    let time = spawn_text(commands, font.clone(), "TIME", 3);
+
+    spawn_row(commands, &[name, score, kill, time])
+}
+
+fn spawn_score_row(
+    commands: &mut Commands,
+    font: Handle<Font>,
+    leaderboard_data: &Res<LeaderboardData>,
+    i: usize,
+) -> Entity {
+    if i >= leaderboard_data.len() {
+        return commands.spawn(NodeBundle::default()).id();
+    }
+
+    let name = spawn_text(commands, font.clone(), &leaderboard_data[i].name, 0);
+    let score = spawn_text(commands, font.clone(), &leaderboard_data[i].score, 1);
+    let kill = spawn_text(commands, font.clone(), "-", 2);
+    let time = spawn_text(commands, font.clone(), "-", 3);
+
+    spawn_row(commands, &[name, score, kill, time])
+}
+
+fn spawn_leaderboard(
+    mut commands: Commands,
+    assets: Res<GameAssets>,
+    leaderboard_data: Res<LeaderboardData>,
+) {
     let header = spawn_header(&mut commands, assets.font.clone());
+
+    let mut score_rows = Vec::new();
+    for i in 0..10 {
+        score_rows.push(spawn_score_row(
+            &mut commands,
+            assets.font.clone(),
+            &leaderboard_data,
+            i,
+        ));
+    }
+
+    let mut children = vec![header];
+    children.extend(score_rows);
 
     commands
         .spawn((
@@ -72,8 +121,7 @@ fn spawn_leaderboard(mut commands: Commands, assets: Res<GameAssets>) {
                     top: Val::Percent(25.0),
                     width: Val::Percent(100.0),
                     flex_direction: FlexDirection::Column,
-                    row_gap: Val::Vh(3.0),
-                    align_items: AlignItems::Center,
+                    row_gap: Val::Vh(7.0),
                     position_type: PositionType::Absolute,
                     ..default()
                 },
@@ -81,7 +129,13 @@ fn spawn_leaderboard(mut commands: Commands, assets: Res<GameAssets>) {
                 ..default()
             },
         ))
-        .push_children(&[header]);
+        .push_children(&children);
+}
+
+fn despawn_leaderboard(mut commands: Commands, q_leaderboards: Query<Entity, With<Leaderboard>>) {
+    for entity in &q_leaderboards {
+        commands.entity(entity).despawn_recursive();
+    }
 }
 
 fn fetch_leaderboard_data(mut commands: Commands) {
@@ -122,14 +176,55 @@ fn fetch_leaderboard_data(mut commands: Commands) {
 
 fn handle_leaderboard_task(
     mut commands: Commands,
-    mut transform_tasks: Query<(Entity, &mut FetchData)>,
+    mut tasks: Query<(Entity, &mut FetchData)>,
+    mut ev_data_fetched: EventWriter<DataFetched>,
 ) {
-    for (entity, mut task) in &mut transform_tasks {
+    for (entity, mut task) in &mut tasks {
         if let Some(response) = block_on(future::poll_once(&mut task.0)) {
-            info!("{}", response);
+            ev_data_fetched.send(DataFetched(response));
             commands.entity(entity).remove::<FetchData>();
+            commands.entity(entity).despawn_recursive();
         }
     }
+}
+
+fn trigger_loading(
+    mut commands: Commands,
+    mut next_state: ResMut<NextState<GameOverState>>,
+    mut ev_submitted_text_input: EventReader<SubmittedTextInput>,
+) {
+    for ev in ev_submitted_text_input.read() {
+        commands.insert_resource(PlayerName(ev.0.clone()));
+        next_state.set(GameOverState::Loading);
+    }
+}
+
+fn trigger_leaderboard(
+    mut commands: Commands,
+    mut next_state: ResMut<NextState<GameOverState>>,
+    mut ev_data_fetched: EventReader<DataFetched>,
+) {
+    for ev in ev_data_fetched.read() {
+        commands.insert_resource(string_to_leaderboard(&ev.0));
+        next_state.set(GameOverState::Leaderboard);
+    }
+}
+
+fn string_to_leaderboard(s: &str) -> LeaderboardData {
+    if s.is_empty() {
+        return LeaderboardData(Vec::new());
+    }
+
+    let rows: Vec<&str> = s.split(";").collect();
+    let mut result = Vec::new();
+    for row in rows {
+        let values: Vec<&str> = row.split(",").collect();
+        result.push(LeaderboardEntry {
+            name: values[0].to_string(),
+            score: values[1].to_string(),
+        });
+    }
+    LeaderboardData(result)
 }
 
 // fn spawn_restart_text(commands: &mut Commands, font: Handle<Font>) -> Entity {
@@ -156,14 +251,20 @@ pub struct LeaderboardPlugin;
 
 impl Plugin for LeaderboardPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            OnEnter(GameOverState::Loading),
-            (fetch_leaderboard_data,).run_if(in_state(GameState::GameOver)),
-        )
-        .add_systems(
-            OnEnter(GameOverState::Leaderboard),
-            (spawn_leaderboard,).run_if(in_state(GameState::GameOver)),
-        )
-        .add_systems(Update, handle_leaderboard_task);
+        app.add_event::<DataFetched>()
+            .add_systems(OnEnter(GameOverState::Leaderboard), (spawn_leaderboard,))
+            .add_systems(OnExit(GameState::GameOver), (despawn_leaderboard,))
+            .add_systems(
+                OnEnter(GameOverState::Loading),
+                (fetch_leaderboard_data,).run_if(in_state(GameState::GameOver)),
+            )
+            .add_systems(
+                Update,
+                (
+                    handle_leaderboard_task,
+                    trigger_loading,
+                    trigger_leaderboard,
+                ),
+            );
     }
 }

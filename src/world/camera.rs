@@ -120,7 +120,7 @@ impl Plugin for CameraPlugin {
             Update,
             (
                 #[cfg(not(target_arch = "wasm32"))]
-                toggle_full_screen,
+                toggle_full_screen.run_if(not(in_state(GameState::GameOver))),
                 #[cfg(not(target_arch = "wasm32"))]
                 take_screenshot,
                 apply_y_sort,

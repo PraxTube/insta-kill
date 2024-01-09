@@ -4,6 +4,7 @@ use crate::{
     player::{
         input::PlayerInput, kill_counter::KillCounter, score::PlayerScore, speed_timer::SpeedTimer,
     },
+    ui::game_over::GameOverState,
     GameState,
 };
 
@@ -51,7 +52,9 @@ impl Plugin for RestartPlugin {
             .add_systems(OnEnter(GameState::Restart), (reset_resources,))
             .add_systems(
                 Update,
-                (initiate_restart,).run_if(in_state(GameState::GameOver)),
+                (initiate_restart,).run_if(
+                    in_state(GameState::GameOver).and_then(in_state(GameOverState::Leaderboard)),
+                ),
             )
             .add_systems(Update, (restart,).run_if(in_state(GameState::Restart)));
     }

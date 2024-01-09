@@ -11,6 +11,12 @@ const CHAR_SIZE: f32 = 2.5;
 const CHAR_OFFSET: f32 = 1.5;
 const CHAR_PIXEL_FACTOR: f32 = 12.8;
 
+#[derive(Resource, Default, Debug)]
+pub struct TypingState {
+    buf: String,
+    just_typed_char: bool,
+}
+
 #[derive(Component)]
 pub struct InputField;
 #[derive(Component)]
@@ -21,15 +27,7 @@ struct TypingCursor;
 struct TypingCursorTimer(Timer);
 
 #[derive(Event)]
-pub struct TypingSubmitEvent {
-    pub value: String,
-}
-
-#[derive(Resource, Default, Debug)]
-pub struct TypingState {
-    buf: String,
-    just_typed_char: bool,
-}
+pub struct SubmittedTextInput(pub String);
 
 fn trim_last_word(s: &str) -> String {
     let trimmed_str = s.trim_end();
@@ -175,7 +173,7 @@ fn update_cursor_text(
 
 fn push_chars(
     mut typing_state: ResMut<TypingState>,
-    mut typing_submit_events: EventWriter<TypingSubmitEvent>,
+    mut submitted_text_input: EventWriter<SubmittedTextInput>,
     mut keyboard_input_events: EventReader<KeyboardInput>,
     keys: Res<Input<KeyCode>>,
 ) {
@@ -234,7 +232,7 @@ fn push_chars(
 
             if ev.key_code == Some(KeyCode::Return) {
                 let text = typing_state.buf.clone();
-                typing_submit_events.send(TypingSubmitEvent { value: text });
+                submitted_text_input.send(SubmittedTextInput(text));
             }
 
             if ev.key_code == Some(KeyCode::Back) {
@@ -257,7 +255,7 @@ impl Plugin for TextFieldPlugin {
             TimerMode::Repeating,
         )))
         .init_resource::<TypingState>()
-        .add_event::<TypingSubmitEvent>()
+        .add_event::<SubmittedTextInput>()
         .add_systems(OnEnter(GameState::GameOver), clear_buffer_text)
         .add_systems(
             Update,

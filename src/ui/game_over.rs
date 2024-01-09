@@ -1,14 +1,13 @@
 use bevy::prelude::*;
 
-use crate::{
-    player::{input::PlayerInput, score::PlayerScore},
-    GameAssets, GameState,
-};
+use crate::{player::score::PlayerScore, GameAssets, GameState};
 
 use super::text_field::spawn_text_field;
 
 #[derive(Component)]
 struct GameOverScreen;
+#[derive(Component)]
+struct GameOverBackground;
 
 #[derive(States, Clone, Eq, PartialEq, Debug, Hash, Default)]
 pub enum GameOverState {
@@ -20,7 +19,7 @@ pub enum GameOverState {
 
 fn spawn_background(commands: &mut Commands, texture: Handle<Image>) {
     commands.spawn((
-        GameOverScreen,
+        GameOverBackground,
         ImageBundle {
             style: Style {
                 height: Val::Vh(100.0),
@@ -49,7 +48,7 @@ fn spawn_title(commands: &mut Commands, font: Handle<Font>) -> Entity {
         "GAME OVER".to_string(),
         text_style.clone(),
     )]);
-    commands.spawn((GameOverScreen, text_bundle)).id()
+    commands.spawn(text_bundle).id()
 }
 
 fn spawn_player_score(commands: &mut Commands, font: Handle<Font>, score: u32) -> Entity {
@@ -60,7 +59,7 @@ fn spawn_player_score(commands: &mut Commands, font: Handle<Font>, score: u32) -
         color: Color::WHITE,
     };
     let text_bundle = TextBundle::from_sections([TextSection::new(text, text_style.clone())]);
-    commands.spawn((GameOverScreen, text_bundle)).id()
+    commands.spawn(text_bundle).id()
 }
 
 fn spawn_text(commands: &mut Commands, font: Handle<Font>, score: u32) {
@@ -106,15 +105,17 @@ fn despawn_game_over_screens(
     }
 }
 
-fn load_leaderboard(
-    mut next_state: ResMut<NextState<GameOverState>>,
-    player_input: Res<PlayerInput>,
+fn despawn_game_over_background(
+    mut commands: Commands,
+    q_backgrounds: Query<Entity, With<GameOverBackground>>,
 ) {
-    if !player_input.dash {
-        return;
+    for entity in &q_backgrounds {
+        commands.entity(entity).despawn_recursive();
     }
+}
 
-    next_state.set(GameOverState::Loading);
+fn reset_game_over_state(mut next_state: ResMut<NextState<GameOverState>>) {
+    next_state.set(GameOverState::GameOver);
 }
 
 pub struct GameOverPlugin;
@@ -122,13 +123,11 @@ pub struct GameOverPlugin;
 impl Plugin for GameOverPlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<GameOverState>()
-            .add_systems(OnEnter(GameState::GameOver), (spawn_game_over_screen,))
-            .add_systems(OnExit(GameState::Restart), despawn_game_over_screens)
             .add_systems(
-                Update,
-                (load_leaderboard,).run_if(
-                    in_state(GameState::GameOver).and_then(in_state(GameOverState::GameOver)),
-                ),
-            );
+                OnEnter(GameState::GameOver),
+                (spawn_game_over_screen, reset_game_over_state),
+            )
+            .add_systems(OnExit(GameOverState::GameOver), despawn_game_over_screens)
+            .add_systems(OnExit(GameState::GameOver), despawn_game_over_background);
     }
 }
