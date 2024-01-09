@@ -10,7 +10,7 @@ use bevy::{
     tasks::{block_on, AsyncComputeTaskPool, Task},
 };
 
-use crate::{GameAssets, GameState};
+use crate::{player::score::PlayerScore, GameAssets, GameState};
 
 use super::{game_over::GameOverState, text_field::SubmittedTextInput};
 
@@ -22,8 +22,6 @@ struct LeaderboardEntry {
     score: String,
 }
 
-#[derive(Resource)]
-struct PlayerName(String);
 #[derive(Resource, Deref, DerefMut)]
 struct LeaderboardData(Vec<LeaderboardEntry>);
 
@@ -31,6 +29,8 @@ struct LeaderboardData(Vec<LeaderboardEntry>);
 struct Leaderboard;
 #[derive(Component)]
 struct FetchData(Task<String>);
+#[derive(Component)]
+struct PostData(Task<String>);
 
 #[derive(Event)]
 struct DataFetched(String);
@@ -138,7 +138,7 @@ fn despawn_leaderboard(mut commands: Commands, q_leaderboards: Query<Entity, Wit
     }
 }
 
-fn fetch_leaderboard_data(mut commands: Commands) {
+fn send_get_request(mut commands: Commands) {
     let thread_pool = AsyncComputeTaskPool::get();
     // Spawn new task on the AsyncComputeTaskPool; the task will be
     // executed in the background, and the Task future returned by
@@ -146,9 +146,9 @@ fn fetch_leaderboard_data(mut commands: Commands) {
     let task = thread_pool.spawn(async move {
         let request = format!(
             "GET / HTTP/1.1\r\n\
-         Host: {}\r\n\
-         Connection: close\r\n\
-         \r\n",
+             Host: {}\r\n\
+             Connection: close\r\n\
+             \r\n",
             HOST
         );
         let error_str = String::from("ERROR");
@@ -174,7 +174,7 @@ fn fetch_leaderboard_data(mut commands: Commands) {
     commands.spawn(FetchData(task));
 }
 
-fn handle_leaderboard_task(
+fn handle_get_task(
     mut commands: Commands,
     mut tasks: Query<(Entity, &mut FetchData)>,
     mut ev_data_fetched: EventWriter<DataFetched>,
@@ -188,13 +188,20 @@ fn handle_leaderboard_task(
     }
 }
 
+fn handle_post_task(mut commands: Commands, mut tasks: Query<(Entity, &mut PostData)>) {
+    for (entity, mut task) in &mut tasks {
+        if let Some(_response) = block_on(future::poll_once(&mut task.0)) {
+            commands.entity(entity).remove::<PostData>();
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
 fn trigger_loading(
-    mut commands: Commands,
     mut next_state: ResMut<NextState<GameOverState>>,
     mut ev_submitted_text_input: EventReader<SubmittedTextInput>,
 ) {
-    for ev in ev_submitted_text_input.read() {
-        commands.insert_resource(PlayerName(ev.0.clone()));
+    for _ in ev_submitted_text_input.read() {
         next_state.set(GameOverState::Loading);
     }
 }
@@ -227,6 +234,57 @@ fn string_to_leaderboard(s: &str) -> LeaderboardData {
     LeaderboardData(result)
 }
 
+fn send_post_request(
+    mut commands: Commands,
+    player_score: Res<PlayerScore>,
+    mut ev_submitted_text_input: EventReader<SubmittedTextInput>,
+) {
+    let thread_pool = AsyncComputeTaskPool::get();
+
+    for ev in ev_submitted_text_input.read() {
+        let name = ev.0.clone();
+        let score = player_score.score();
+
+        let task = thread_pool.spawn(async move {
+            let error_str = String::from("ERROR");
+            let data_to_send = format!("{},{}", name, score);
+
+            let request = format!(
+                "POST / HTTP/1.1\r\n\
+                 Host: {}\r\n\
+                 Content-Length: {}\r\n\
+                 Content-Type: text/plain\r\n\
+                 Connection: close\r\n\
+                 \r\n\
+                 {}\r\n",
+                HOST,
+                data_to_send.len(),
+                data_to_send
+            );
+
+            if let Ok(mut stream) = TcpStream::connect(format!("{}:{}", HOST, PORT)) {
+                if let Err(e) = stream.write_all(request.as_bytes()) {
+                    error!("Failed to send request: {}", e);
+                    return error_str;
+                }
+
+                let mut response = String::new();
+                if let Err(e) = stream.read_to_string(&mut response) {
+                    error!("Failed to read response: {}", e);
+                    return error_str;
+                }
+
+                println!("Response:\n{}", response);
+                return response;
+            } else {
+                error!("Failed to connect to the server");
+            }
+            return error_str;
+        });
+        commands.spawn(PostData(task));
+    }
+}
+
 // fn spawn_restart_text(commands: &mut Commands, font: Handle<Font>) -> Entity {
 //     let text = "PRESS 'R' TO RESTART";
 //     let text_style = TextStyle {
@@ -256,14 +314,16 @@ impl Plugin for LeaderboardPlugin {
             .add_systems(OnExit(GameState::GameOver), (despawn_leaderboard,))
             .add_systems(
                 OnEnter(GameOverState::Loading),
-                (fetch_leaderboard_data,).run_if(in_state(GameState::GameOver)),
+                (send_get_request,).run_if(in_state(GameState::GameOver)),
             )
             .add_systems(
                 Update,
                 (
-                    handle_leaderboard_task,
+                    handle_get_task,
+                    handle_post_task,
                     trigger_loading,
                     trigger_leaderboard,
+                    send_post_request,
                 ),
             );
     }
