@@ -10,16 +10,23 @@ use bevy::{
     tasks::{block_on, AsyncComputeTaskPool, Task},
 };
 
-use crate::{player::score::PlayerScore, GameAssets, GameState};
+use crate::{
+    player::{kill_counter::KillCounter, score::PlayerScore, speed_timer::SpeedTimer},
+    utils::format_time,
+    GameAssets, GameState,
+};
 
 use super::{game_over::GameOverState, text_field::SubmittedTextInput};
 
 const HOST: &str = "rancic.org";
 const PORT: &str = "3434";
+const LEADERBOARD_COUNT: usize = 7;
 
 struct LeaderboardEntry {
     name: String,
     score: String,
+    kills: String,
+    time: String,
 }
 
 #[derive(Resource, Deref, DerefMut)]
@@ -87,8 +94,8 @@ fn spawn_score_row(
 
     let name = spawn_text(commands, font.clone(), &leaderboard_data[i].name, 0);
     let score = spawn_text(commands, font.clone(), &leaderboard_data[i].score, 1);
-    let kill = spawn_text(commands, font.clone(), "-", 2);
-    let time = spawn_text(commands, font.clone(), "-", 3);
+    let kill = spawn_text(commands, font.clone(), &leaderboard_data[i].kills, 2);
+    let time = spawn_text(commands, font.clone(), &leaderboard_data[i].time, 3);
 
     spawn_row(commands, &[name, score, kill, time])
 }
@@ -101,7 +108,7 @@ fn spawn_leaderboard(
     let header = spawn_header(&mut commands, assets.font.clone());
 
     let mut score_rows = Vec::new();
-    for i in 0..10 {
+    for i in 0..LEADERBOARD_COUNT {
         score_rows.push(spawn_score_row(
             &mut commands,
             assets.font.clone(),
@@ -151,25 +158,20 @@ fn send_get_request(mut commands: Commands) {
              \r\n",
             HOST
         );
-        let error_str = String::from("ERROR");
 
         if let Ok(mut stream) = TcpStream::connect(format!("{}:{}", HOST, PORT)) {
             if let Err(e) = stream.write_all(request.as_bytes()) {
-                error!("Failed to send request: {}", e);
-                return error_str;
+                return format!("Failed to send request: {}", e);
             }
 
             let mut response = String::new();
             if let Err(e) = stream.read_to_string(&mut response) {
-                error!("Failed to read response: {}", e);
-                return error_str;
+                return format!("Failed to read response: {}", e);
             }
 
             return response;
-        } else {
-            error!("Failed to connect to the server");
         }
-        error_str
+        "Failed to connect to the server".to_string()
     });
     commands.spawn(FetchData(task));
 }
@@ -222,13 +224,15 @@ fn string_to_leaderboard(s: &str) -> LeaderboardData {
         return LeaderboardData(Vec::new());
     }
 
-    let rows: Vec<&str> = s.split(";").collect();
+    let rows: Vec<&str> = s.split(';').collect();
     let mut result = Vec::new();
     for row in rows {
-        let values: Vec<&str> = row.split(",").collect();
+        let values: Vec<&str> = row.split(',').collect();
         result.push(LeaderboardEntry {
             name: values[0].to_string(),
             score: values[1].to_string(),
+            kills: values[2].to_string(),
+            time: format_time(values[3].parse().unwrap_or_default()),
         });
     }
     LeaderboardData(result)
@@ -237,6 +241,8 @@ fn string_to_leaderboard(s: &str) -> LeaderboardData {
 fn send_post_request(
     mut commands: Commands,
     player_score: Res<PlayerScore>,
+    kill_counter: Res<KillCounter>,
+    speed_timer: Res<SpeedTimer>,
     mut ev_submitted_text_input: EventReader<SubmittedTextInput>,
 ) {
     let thread_pool = AsyncComputeTaskPool::get();
@@ -244,10 +250,11 @@ fn send_post_request(
     for ev in ev_submitted_text_input.read() {
         let name = ev.0.clone();
         let score = player_score.score();
+        let kills = kill_counter.kills();
+        let time = speed_timer.elapsed;
 
         let task = thread_pool.spawn(async move {
-            let error_str = String::from("ERROR");
-            let data_to_send = format!("{},{}", name, score);
+            let data_to_send = format!("{},{},{},{}", name, score, kills, time);
 
             let request = format!(
                 "POST / HTTP/1.1\r\n\
@@ -264,22 +271,18 @@ fn send_post_request(
 
             if let Ok(mut stream) = TcpStream::connect(format!("{}:{}", HOST, PORT)) {
                 if let Err(e) = stream.write_all(request.as_bytes()) {
-                    error!("Failed to send request: {}", e);
-                    return error_str;
+                    return format!("Failed to send request: {}", e);
                 }
 
                 let mut response = String::new();
                 if let Err(e) = stream.read_to_string(&mut response) {
-                    error!("Failed to read response: {}", e);
-                    return error_str;
+                    return format!("Failed to read response: {}", e);
                 }
 
                 println!("Response:\n{}", response);
                 return response;
-            } else {
-                error!("Failed to connect to the server");
             }
-            return error_str;
+            "Failed to connect to the server".to_string()
         });
         commands.spawn(PostData(task));
     }

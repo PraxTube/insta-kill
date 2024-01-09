@@ -27,7 +27,19 @@ fn reset_resources(
     *player_score = PlayerScore::default();
 }
 
-fn initiate_restart(mut next_state: ResMut<NextState<GameState>>, player_input: Res<PlayerInput>) {
+fn initiate_restart_from_game_over(
+    mut next_state: ResMut<NextState<GameState>>,
+    player_input: Res<PlayerInput>,
+) {
+    if player_input.escape {
+        next_state.set(GameState::Restart);
+    }
+}
+
+fn initiate_restart_from_leaderboard(
+    mut next_state: ResMut<NextState<GameState>>,
+    player_input: Res<PlayerInput>,
+) {
     if player_input.restart {
         next_state.set(GameState::Restart);
     }
@@ -52,7 +64,13 @@ impl Plugin for RestartPlugin {
             .add_systems(OnEnter(GameState::Restart), (reset_resources,))
             .add_systems(
                 Update,
-                (initiate_restart,).run_if(
+                (initiate_restart_from_game_over,).run_if(
+                    in_state(GameState::GameOver).and_then(in_state(GameOverState::GameOver)),
+                ),
+            )
+            .add_systems(
+                Update,
+                (initiate_restart_from_leaderboard,).run_if(
                     in_state(GameState::GameOver).and_then(in_state(GameOverState::Leaderboard)),
                 ),
             )
