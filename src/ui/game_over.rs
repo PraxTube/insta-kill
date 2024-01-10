@@ -63,7 +63,7 @@ fn spawn_player_score(commands: &mut Commands, font: Handle<Font>, score: u32) -
 }
 
 fn spawn_restart_text(commands: &mut Commands, font: Handle<Font>) -> Entity {
-    let text = format!("ESC to skip and restart");
+    let text = "ESC to skip and restart".to_string();
     let text_style = TextStyle {
         font,
         font_size: 30.0,
