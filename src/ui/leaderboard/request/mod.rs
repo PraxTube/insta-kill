@@ -1,4 +1,6 @@
+#[cfg(not(target_arch = "wasm32"))]
 mod request_desktop;
+#[cfg(target_arch = "wasm32")]
 mod request_wasm;
 
 use bevy::prelude::*;
@@ -64,12 +66,21 @@ fn string_to_leaderboard(s: &str) -> LeaderboardData {
     let mut result = Vec::new();
     for row in rows {
         let values: Vec<&str> = row.split(',').collect();
-        result.push(LeaderboardEntry {
-            name: values[0].to_string(),
-            score: values[1].to_string(),
-            kills: values[2].to_string(),
-            time: format_time(values[3].parse().unwrap_or_default()),
-        });
+        let entry = if values.len() != 4 {
+            error!(
+                "The leaderboard entry doesn't have exaclty 4 entries, {:?}",
+                values
+            );
+            LeaderboardEntry::default()
+        } else {
+            LeaderboardEntry {
+                name: values[0].to_string(),
+                score: values[1].to_string(),
+                kills: values[2].to_string(),
+                time: format_time(values[3].parse().unwrap_or_default()),
+            }
+        };
+        result.push(entry);
     }
     LeaderboardData(result)
 }

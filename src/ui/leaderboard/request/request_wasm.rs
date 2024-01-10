@@ -29,6 +29,7 @@ fn post_request(request: &str) -> String {
         println!("Response:\n{}", response);
         response
     } else {
+        error!("Failed to connect to the server");
         "Failed to connect to the server".to_string()
     }
 }
@@ -67,6 +68,7 @@ fn get_request(request: &str) -> String {
 
         response
     } else {
+        error!("Failed to connect to the server");
         "Failed to connect to the server".to_string()
     }
 }

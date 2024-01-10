@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 #[cfg(not(target_arch = "wasm32"))]
 use bevy::render::view::screenshot::ScreenshotManager;
+#[cfg(not(target_arch = "wasm32"))]
 use bevy::window::{PrimaryWindow, WindowMode};
 use bevy_kira_audio::prelude::AudioReceiver;
 use bevy_rapier2d::dynamics::Velocity;
