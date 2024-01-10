@@ -2264,7 +2264,7 @@ dependencies = [
 
 [[package]]
 name = "insta-kill"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "bevy",
  "bevy_asset_loader",

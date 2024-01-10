@@ -40,7 +40,7 @@ fn initiate_restart_from_leaderboard(
     mut next_state: ResMut<NextState<GameState>>,
     player_input: Res<PlayerInput>,
 ) {
-    if player_input.restart {
+    if player_input.restart || player_input.escape {
         next_state.set(GameState::Restart);
     }
 }

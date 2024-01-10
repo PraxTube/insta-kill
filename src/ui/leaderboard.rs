@@ -8,6 +8,7 @@ use futures_lite::future;
 use bevy::{
     prelude::*,
     tasks::{block_on, AsyncComputeTaskPool, Task},
+    utils::futures::now_or_never,
 };
 
 use crate::{
@@ -196,6 +197,23 @@ fn handle_post_task(mut commands: Commands, mut tasks: Query<(Entity, &mut PostD
             commands.entity(entity).remove::<PostData>();
             commands.entity(entity).despawn_recursive();
         }
+    }
+}
+
+fn drop_all_tasks(
+    mut commands: Commands,
+    mut get_tasks: Query<(Entity, &mut FetchData), Without<PostData>>,
+    mut post_tasks: Query<(Entity, &mut PostData), Without<FetchData>>,
+) {
+    for (entity, mut task) in &mut get_tasks {
+        now_or_never(&mut task.0);
+        commands.entity(entity).remove::<FetchData>();
+        commands.entity(entity).despawn_recursive();
+    }
+    for (entity, mut task) in &mut post_tasks {
+        now_or_never(&mut task.0);
+        commands.entity(entity).remove::<PostData>();
+        commands.entity(entity).despawn_recursive();
     }
 }
 

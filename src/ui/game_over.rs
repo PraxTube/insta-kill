@@ -62,10 +62,31 @@ fn spawn_player_score(commands: &mut Commands, font: Handle<Font>, score: u32) -
     commands.spawn(text_bundle).id()
 }
 
+fn spawn_restart_text(commands: &mut Commands, font: Handle<Font>) -> Entity {
+    let text = format!("ESC to skip and restart");
+    let text_style = TextStyle {
+        font,
+        font_size: 30.0,
+        color: Color::WHITE,
+    };
+    let text_bundle = TextBundle::from_sections([TextSection::new(text, text_style.clone())]);
+    commands
+        .spawn(text_bundle)
+        .insert(Style {
+            margin: UiRect {
+                top: Val::Px(100.0),
+                ..default()
+            },
+            ..default()
+        })
+        .id()
+}
+
 fn spawn_text(commands: &mut Commands, font: Handle<Font>, score: u32) {
     let title_text = spawn_title(commands, font.clone());
     let score_text = spawn_player_score(commands, font.clone(), score);
     let input_field = spawn_text_field(commands, font.clone());
+    let restart_text = spawn_restart_text(commands, font.clone());
 
     commands
         .spawn((
@@ -84,7 +105,7 @@ fn spawn_text(commands: &mut Commands, font: Handle<Font>, score: u32) {
                 ..default()
             },
         ))
-        .push_children(&[title_text, score_text, input_field]);
+        .push_children(&[title_text, score_text, input_field, restart_text]);
 }
 
 fn spawn_game_over_screen(
