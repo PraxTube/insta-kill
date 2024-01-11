@@ -9,7 +9,7 @@ use crate::player::{kill_counter::KillCounter, score::PlayerScore, speed_timer::
 
 use super::{
     super::{super::text_field::SubmittedTextInput, DataFetched, HOST, PORT},
-    get_request_string, post_request_string,
+    post_request_string, GET_REQEUST,
 };
 
 #[derive(Event)]
@@ -55,24 +55,6 @@ fn send_post_request(
     }
 }
 
-fn get_request(request: &str) -> String {
-    if let Ok(mut stream) = TcpStream::connect(format!("{}:{}", HOST, PORT)) {
-        if let Err(e) = stream.write_all(request.as_bytes()) {
-            return format!("Failed to send request: {}", e);
-        }
-
-        let mut response = String::new();
-        if let Err(e) = stream.read_to_string(&mut response) {
-            return format!("Failed to read response: {}", e);
-        }
-
-        response
-    } else {
-        error!("Failed to connect to the server");
-        "Failed to connect to the server".to_string()
-    }
-}
-
 fn send_get_request(
     mut ev_data_posted: EventReader<DataPosted>,
     mut ev_data_fetched: EventWriter<DataFetched>,
@@ -82,8 +64,13 @@ fn send_get_request(
     }
     ev_data_posted.clear();
 
-    let request = get_request_string();
-    let response = get_request(&request);
+    let response = match reqwest::blocking::get(GET_REQEUST) {
+        Ok(r) => r.text().unwrap_or_default(),
+        Err(err) => {
+            error!("GET reqwest failed, {}", err);
+            return;
+        }
+    };
     ev_data_fetched.send(DataFetched(response));
 }
 

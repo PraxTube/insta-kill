@@ -15,11 +15,11 @@ use crate::player::{kill_counter::KillCounter, score::PlayerScore, speed_timer::
 
 use super::{
     super::{super::text_field::SubmittedTextInput, DataFetched, HOST, PORT},
-    get_request_string, post_request_string,
+    post_request_string, GET_REQEUST,
 };
 
 #[derive(Component)]
-struct FetchData(Task<String>);
+struct FetchData(Task<Result<String, reqwest::Error>>);
 #[derive(Component)]
 struct PostData(Task<String>);
 
@@ -74,23 +74,7 @@ fn send_get_request(mut commands: Commands, mut ev_data_posted: EventReader<Data
     // Spawn new task on the AsyncComputeTaskPool; the task will be
     // executed in the background, and the Task future returned by
     // spawn() can be used to poll for the result
-    let task = thread_pool.spawn(async move {
-        let request = get_request_string();
-
-        if let Ok(mut stream) = TcpStream::connect(format!("{}:{}", HOST, PORT)) {
-            if let Err(e) = stream.write_all(request.as_bytes()) {
-                return format!("Failed to send request: {}", e);
-            }
-
-            let mut response = String::new();
-            if let Err(e) = stream.read_to_string(&mut response) {
-                return format!("Failed to read response: {}", e);
-            }
-
-            return response;
-        }
-        "Failed to connect to the server".to_string()
-    });
+    let task = thread_pool.spawn(async move { reqwest::blocking::get(GET_REQEUST)?.text() });
     commands.spawn(FetchData(task));
 }
 
@@ -114,10 +98,17 @@ fn handle_get_task(
     mut ev_data_fetched: EventWriter<DataFetched>,
 ) {
     for (entity, mut task) in &mut tasks {
-        if let Some(response) = block_on(future::poll_once(&mut task.0)) {
-            ev_data_fetched.send(DataFetched(response));
-            commands.entity(entity).remove::<FetchData>();
-            commands.entity(entity).despawn_recursive();
+        if let Some(reqwest_response) = block_on(future::poll_once(&mut task.0)) {
+            match reqwest_response {
+                Ok(response) => {
+                    ev_data_fetched.send(DataFetched(response));
+                    commands.entity(entity).remove::<FetchData>();
+                    commands.entity(entity).despawn_recursive();
+                }
+                Err(err) => {
+                    error!("GET reqwest failed, {}", err);
+                }
+            }
         }
     }
 }
@@ -140,9 +131,9 @@ fn drop_all_tasks(
     }
 }
 
-pub struct LeaderboardRequestDesktopPlugin;
+pub struct LeaderboardRequestNativePlugin;
 
-impl Plugin for LeaderboardRequestDesktopPlugin {
+impl Plugin for LeaderboardRequestNativePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,

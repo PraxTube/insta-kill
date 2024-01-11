@@ -1,6 +1,6 @@
 #[cfg(not(target_arch = "wasm32"))]
-mod request_desktop;
-#[cfg(target_arch = "wasm32")]
+mod request_native;
+// #[cfg(target_arch = "wasm32")]
 mod request_wasm;
 
 use bevy::prelude::*;
@@ -11,6 +11,8 @@ use super::{
     super::{game_over::GameOverState, text_field::SubmittedTextInput},
     DataFetched, LeaderboardData, LeaderboardEntry,
 };
+
+const GET_REQEUST: &str = "https://rancic.org/games/insta-kill/leaderboard.csv";
 
 fn post_request_string(data_to_send: String) -> String {
     format!(
@@ -24,16 +26,6 @@ fn post_request_string(data_to_send: String) -> String {
         HOST,
         data_to_send.len(),
         data_to_send
-    )
-}
-
-fn get_request_string() -> String {
-    format!(
-        "GET / HTTP/1.1\r\n\
-             Host: {}\r\n\
-             Connection: close\r\n\
-             \r\n",
-        HOST
     )
 }
 
@@ -62,7 +54,7 @@ fn string_to_leaderboard(s: &str) -> LeaderboardData {
         return LeaderboardData(Vec::new());
     }
 
-    let rows: Vec<&str> = s.split(';').collect();
+    let rows: Vec<&str> = s.trim_end_matches('\n').split('\n').collect();
     let mut result = Vec::new();
     for row in rows {
         let values: Vec<&str> = row.split(',').collect();
@@ -91,7 +83,7 @@ impl Plugin for LeaderboardRequestPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
             #[cfg(not(target_arch = "wasm32"))]
-            request_desktop::LeaderboardRequestDesktopPlugin,
+            request_native::LeaderboardRequestNativePlugin,
             #[cfg(target_arch = "wasm32")]
             request_wasm::LeaderboardRequestWASMPlugin,
         ))
