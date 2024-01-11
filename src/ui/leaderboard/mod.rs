@@ -3,8 +3,6 @@ mod visual;
 
 use bevy::prelude::*;
 
-const HOST: &str = "rancic.org";
-const PORT: &str = "3434";
 const LEADERBOARD_COUNT: usize = 7;
 
 #[derive(Default)]

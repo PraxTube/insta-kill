@@ -17,10 +17,9 @@ opt-level = 3
 chrono = "0.4.31"
 rand = "0.8.5"
 rand_xoshiro = "0.6.0"
-futures-lite = "1.13.0"
-reqwest = { version = "0.11.23", features = ["blocking"] }
 
 bevy = "0.12.1"
+bevy_mod_reqwest = "0.12.0"
 bevy_screen_diagnostics = "0.4.0"
 bevy_asset_loader = { version = "0.19.0", features = ["2d"] }
 bevy_ecs_ldtk = { git = "https://github.com/PraxTube/bevy_ecs_ldtk.git", branch = "feat/bevy-0.12", features = ["atlas"]}

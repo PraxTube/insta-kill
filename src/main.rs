@@ -15,6 +15,7 @@ use bevy::prelude::*;
 use bevy::window::{PresentMode, Window, WindowMode};
 
 use bevy_asset_loader::prelude::*;
+use bevy_mod_reqwest::ReqwestPlugin;
 use bevy_rapier2d::prelude::*;
 use bevy_trickfilm::Animation2DPlugin;
 
@@ -51,6 +52,7 @@ fn main() {
                 ..default()
             },
             Animation2DPlugin,
+            ReqwestPlugin,
         ))
         .insert_resource(Msaa::Off)
         .add_state::<GameState>()
