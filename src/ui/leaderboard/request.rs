@@ -10,7 +10,7 @@ use super::{
 };
 
 const GET_URL: &str = "https://rancic.org/games/insta-kill/leaderboard.csv";
-const POST_URL: &str = "http://rancic.org:3434/leaderboard";
+const POST_URL: &str = "https://rancic.org:3434/leaderboard";
 
 #[derive(Component)]
 struct PostRequest;
@@ -76,15 +76,16 @@ fn send_post_request(
     mut ev_submitted_text_input: EventReader<SubmittedTextInput>,
 ) {
     for ev in ev_submitted_text_input.read() {
-        let body = format!(
-            "{},{},{},{}",
+        let url = format!(
+            "{}/{}/{}/{}/{}",
+            POST_URL,
             ev.0,
             player_score.score(),
             kill_counter.kills(),
             speed_timer.elapsed
         );
 
-        let req = reqwest.0.post(POST_URL).body(body).build().unwrap();
+        let req = reqwest.0.post(url).build().unwrap();
         let req = ReqwestRequest::new(req);
         commands.spawn((req, PostRequest));
     }
