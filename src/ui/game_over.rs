@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{player::score::PlayerScore, GameAssets, GameState};
+use crate::{
+    player::{input::PlayerInput, score::PlayerScore},
+    GameAssets, GameState,
+};
 
 use super::text_field::spawn_text_field;
 
@@ -139,6 +142,12 @@ fn reset_game_over_state(mut next_state: ResMut<NextState<GameOverState>>) {
     next_state.set(GameOverState::GameOver);
 }
 
+fn restart(mut next_state: ResMut<NextState<GameState>>, player_input: Res<PlayerInput>) {
+    if player_input.escape {
+        next_state.set(GameState::Restart);
+    }
+}
+
 pub struct GameOverPlugin;
 
 impl Plugin for GameOverPlugin {
@@ -148,8 +157,15 @@ impl Plugin for GameOverPlugin {
                 OnEnter(GameState::GameOver),
                 (spawn_game_over_screen, reset_game_over_state),
             )
+            .add_systems(OnExit(GameState::GameOver), reset_game_over_state)
             .add_systems(OnExit(GameState::GameOver), despawn_game_over_screens)
             .add_systems(OnExit(GameOverState::GameOver), despawn_game_over_screens)
-            .add_systems(OnExit(GameState::GameOver), despawn_game_over_background);
+            .add_systems(OnExit(GameState::GameOver), despawn_game_over_background)
+            .add_systems(
+                Update,
+                (restart,).run_if(
+                    in_state(GameState::GameOver).and_then(in_state(GameOverState::GameOver)),
+                ),
+            );
     }
 }

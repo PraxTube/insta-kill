@@ -1,7 +1,12 @@
+mod loading_screen;
 mod request;
 mod visual;
 
 use bevy::prelude::*;
+
+use crate::{player::input::PlayerInput, GameState};
+
+use super::game_over::GameOverState;
 
 const LEADERBOARD_COUNT: usize = 7;
 
@@ -19,13 +24,27 @@ struct LeaderboardData(Vec<LeaderboardEntry>);
 #[derive(Event)]
 struct DataFetched(String);
 
+fn restart(mut next_state: ResMut<NextState<GameState>>, player_input: Res<PlayerInput>) {
+    if player_input.restart || player_input.escape {
+        next_state.set(GameState::Restart);
+    }
+}
+
 pub struct LeaderboardPlugin;
 
 impl Plugin for LeaderboardPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<DataFetched>().add_plugins((
-            visual::LeaderboardVisualPlugin,
-            request::LeaderboardRequestPlugin,
-        ));
+        app.add_event::<DataFetched>()
+            .add_plugins((
+                visual::LeaderboardVisualPlugin,
+                request::LeaderboardRequestPlugin,
+                loading_screen::LeaderboardLoadingScreenPlugin,
+            ))
+            .add_systems(
+                Update,
+                (restart,).run_if(
+                    in_state(GameState::GameOver).and_then(in_state(GameOverState::Leaderboard)),
+                ),
+            );
     }
 }

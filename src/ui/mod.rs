@@ -1,6 +1,6 @@
-pub mod game_over;
 pub mod world_text;
 
+mod game_over;
 mod kill_counter;
 mod leaderboard;
 mod score;

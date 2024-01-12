@@ -16,8 +16,9 @@ const POST_URL: &str = "https://rancic.org:3434/leaderboard";
 struct PostRequest;
 #[derive(Component)]
 struct GetRequest;
+
 #[derive(Event)]
-struct DataPosted;
+pub struct DataPosted;
 
 fn trigger_loading(
     mut next_state: ResMut<NextState<GameOverState>>,

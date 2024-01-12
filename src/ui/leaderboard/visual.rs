@@ -134,7 +134,10 @@ pub struct LeaderboardVisualPlugin;
 
 impl Plugin for LeaderboardVisualPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameOverState::Leaderboard), (spawn_leaderboard,))
-            .add_systems(OnExit(GameState::GameOver), (despawn_leaderboard,));
+        app.add_systems(
+            OnEnter(GameOverState::Leaderboard),
+            (spawn_leaderboard,).run_if(in_state(GameState::GameOver)),
+        )
+        .add_systems(OnExit(GameState::GameOver), (despawn_leaderboard,));
     }
 }
