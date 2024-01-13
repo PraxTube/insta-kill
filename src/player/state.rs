@@ -74,6 +74,9 @@ fn adjust_sprite_flip(mut q_player: Query<(&mut TextureAtlasSprite, &Player)>) {
         return;
     }
 
+    if player.current_direction.x == 0.0 {
+        return;
+    }
     sprite.flip_x = player.current_direction.x < 0.0;
 }
 
