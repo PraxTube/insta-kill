@@ -24,6 +24,14 @@ struct LeaderboardData(Vec<LeaderboardEntry>);
 #[derive(Event)]
 struct DataFetched(String);
 
+impl LeaderboardData {
+    pub fn find_index(&self, name: &str, score: &str) -> Option<usize> {
+        self.0
+            .iter()
+            .position(|entry| entry.name == name && entry.score == score)
+    }
+}
+
 fn restart(mut next_state: ResMut<NextState<GameState>>, player_input: Res<PlayerInput>) {
     if player_input.restart || player_input.escape {
         next_state.set(GameState::Restart);
