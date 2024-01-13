@@ -10,6 +10,7 @@ const FONT_SIZE_INPUT: f32 = 32.0;
 const CHAR_SIZE: f32 = 2.5;
 const CHAR_OFFSET: f32 = 1.5;
 const CHAR_PIXEL_FACTOR: f32 = 12.8;
+const MAX_CHAR_COUNT: usize = 16;
 
 #[derive(Resource, Default, Debug)]
 pub struct TypingState {
@@ -172,22 +173,40 @@ fn update_cursor_text(
 }
 
 fn push_chars(
-    mut typing_state: ResMut<TypingState>,
-    mut submitted_text_input: EventWriter<SubmittedTextInput>,
-    mut keyboard_input_events: EventReader<KeyboardInput>,
     keys: Res<Input<KeyCode>>,
+    mut keyboard_input_events: EventReader<KeyboardInput>,
+    mut typing_state: ResMut<TypingState>,
     q_input_field: Query<With<InputField>>,
+    mut submitted_text_input: EventWriter<SubmittedTextInput>,
 ) {
     let control_active = keys.pressed(KeyCode::ControlLeft);
+    let shift_active = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
 
     for ev in keyboard_input_events.read() {
+        // We run this in the loop so that the events get consumed.
+        // Otherwise we might run into the issue of adding it to the buffer
+        // when spawning the text field.
         if q_input_field.is_empty() {
             continue;
         }
-        // We run this in the loop so that the events get consumed.
-        // Otherwise we might run into the issue of added it to the buffer
-        // when spawning the text field.
         if ev.state.is_pressed() {
+            if ev.key_code == Some(KeyCode::Back) {
+                if !control_active {
+                    typing_state.buf.pop();
+                } else {
+                    typing_state.buf = trim_last_word(&typing_state.buf);
+                }
+            }
+            if ev.key_code == Some(KeyCode::Return) {
+                let text = typing_state.buf.clone();
+                submitted_text_input.send(SubmittedTextInput(text));
+                continue;
+            }
+
+            if typing_state.buf.len() >= MAX_CHAR_COUNT {
+                continue;
+            }
+
             let maybe_char = match ev.key_code {
                 Some(KeyCode::A) => Some('a'),
                 Some(KeyCode::B) => Some('b'),
@@ -222,29 +241,25 @@ fn push_chars(
                 Some(KeyCode::X) => Some('x'),
                 Some(KeyCode::Y) => Some('y'),
                 Some(KeyCode::Z) => Some('z'),
-                Some(KeyCode::Space) => Some(' '),
+                Some(KeyCode::Space) => Some('_'),
                 Some(KeyCode::Minus) => Some('-'),
                 _ => None,
             };
 
             if let Some(char) = maybe_char {
+                let char = if shift_active {
+                    char.to_uppercase()
+                        .to_string()
+                        .chars()
+                        .next()
+                        .unwrap_or(char)
+                } else {
+                    char
+                };
                 typing_state.buf.push(char);
                 typing_state.just_typed_char = true;
             } else {
                 typing_state.just_typed_char = false;
-            }
-
-            if ev.key_code == Some(KeyCode::Return) {
-                let text = typing_state.buf.clone();
-                submitted_text_input.send(SubmittedTextInput(text));
-            }
-
-            if ev.key_code == Some(KeyCode::Back) {
-                if !control_active {
-                    typing_state.buf.pop();
-                } else {
-                    typing_state.buf = trim_last_word(&typing_state.buf);
-                }
             }
         }
     }

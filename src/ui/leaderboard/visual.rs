@@ -8,7 +8,7 @@ use super::{super::game_over::GameOverState, LeaderboardData, LEADERBOARD_COUNT}
 struct Leaderboard;
 
 fn spawn_text(commands: &mut Commands, font: Handle<Font>, text: &str, i: usize) -> Entity {
-    let pos = [150.0, 550.0, 750.0, 950.0];
+    let pos = [-500.0, 0.0, 200.0, 400.0];
     let text_style = TextStyle {
         font,
         font_size: 30.0,
@@ -65,11 +65,32 @@ fn spawn_score_row(
     spawn_row(commands, &[name, score, kill, time])
 }
 
+fn spawn_restart_text(commands: &mut Commands, font: Handle<Font>) -> Entity {
+    let text = "PRESS 'R' TO RESTART";
+    let text_style = TextStyle {
+        font,
+        font_size: 30.0,
+        color: Color::WHITE,
+    };
+    let text_bundle = TextBundle::from_sections([TextSection::new(text, text_style.clone())]);
+    commands
+        .spawn(text_bundle)
+        .insert(Style {
+            margin: UiRect {
+                bottom: Val::Px(20.0),
+                ..default()
+            },
+            ..default()
+        })
+        .id()
+}
+
 fn spawn_leaderboard(
     mut commands: Commands,
     assets: Res<GameAssets>,
     leaderboard_data: Res<LeaderboardData>,
 ) {
+    let restart_text = spawn_restart_text(&mut commands, assets.font.clone());
     let header = spawn_header(&mut commands, assets.font.clone());
 
     let mut score_rows = Vec::new();
@@ -82,7 +103,7 @@ fn spawn_leaderboard(
         ));
     }
 
-    let mut children = vec![header];
+    let mut children = vec![restart_text, header];
     children.extend(score_rows);
 
     commands
@@ -90,10 +111,11 @@ fn spawn_leaderboard(
             Leaderboard,
             NodeBundle {
                 style: Style {
-                    top: Val::Percent(25.0),
+                    top: Val::Percent(15.0),
                     width: Val::Percent(100.0),
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Vh(7.0),
+                    align_items: AlignItems::Center,
                     position_type: PositionType::Absolute,
                     ..default()
                 },
@@ -109,26 +131,6 @@ fn despawn_leaderboard(mut commands: Commands, q_leaderboards: Query<Entity, Wit
         commands.entity(entity).despawn_recursive();
     }
 }
-
-// fn spawn_restart_text(commands: &mut Commands, font: Handle<Font>) -> Entity {
-//     let text = "PRESS 'R' TO RESTART";
-//     let text_style = TextStyle {
-//         font,
-//         font_size: 30.0,
-//         color: Color::WHITE,
-//     };
-//     let text_bundle = TextBundle::from_sections([TextSection::new(text, text_style.clone())]);
-//     commands
-//         .spawn((GameOverScreen, text_bundle))
-//         .insert(Style {
-//             margin: UiRect {
-//                 bottom: Val::Px(20.0),
-//                 ..default()
-//             },
-//             ..default()
-//         })
-//         .id()
-// }
 
 pub struct LeaderboardVisualPlugin;
 

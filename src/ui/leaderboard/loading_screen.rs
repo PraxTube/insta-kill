@@ -18,8 +18,10 @@ fn spawn_loading_text(mut commands: Commands, assets: Res<GameAssets>) {
         color: Color::WHITE,
     };
 
-    let text_bundle =
-        TextBundle::from_sections([TextSection::new(LOADING_MESSAGE, text_style.clone())]);
+    let text_bundle = TextBundle::from_sections([TextSection::new(
+        LOADING_MESSAGE.to_string() + "-",
+        text_style.clone(),
+    )]);
     let loading_text = commands.spawn((text_bundle, LoadingText)).id();
 
     let text_bundle = TextBundle::from_sections([TextSection::new(
