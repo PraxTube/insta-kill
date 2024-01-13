@@ -28,7 +28,7 @@ fn trigger_shooting(
         if archer.state == ArcherState::Shooting || archer.state == ArcherState::Stunned {
             continue;
         }
-        if !archer.shooting_cooldown.finished() {
+        if !archer.moving_cooldown.finished() {
             continue;
         }
 
@@ -85,7 +85,6 @@ fn spawn_projectiles(
             ))
             .push_children(&[collider]);
 
-        archer.shooting_cooldown.reset();
         archer.moving_cooldown.reset();
         archer.state = ArcherState::Idling;
     }

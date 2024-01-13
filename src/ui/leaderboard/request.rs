@@ -45,9 +45,8 @@ fn string_to_leaderboard(s: &str) -> LeaderboardData {
         return LeaderboardData(Vec::new());
     }
 
-    let rows: Vec<&str> = s.trim_end_matches('\n').split('\n').collect();
     let mut result = Vec::new();
-    for row in rows {
+    for row in s.split('\n') {
         let values: Vec<&str> = row.split(',').collect();
         let entry = if values.len() != 4 {
             error!(

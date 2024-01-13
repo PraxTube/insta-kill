@@ -11,7 +11,8 @@ use crate::{GameAssets, GameState};
 
 const MOVE_SPEED: f32 = 80.0;
 const SHOOT_RANGE: f32 = 500.0;
-const SHOOT_COOLDOWN: f32 = 5.0;
+/// How long should the archer idle after shooting before moving again
+const MOVING_COOLDOWN: f32 = 2.0;
 
 pub use super::Enemy;
 
@@ -45,19 +46,15 @@ enum ArcherState {
 pub struct EnemyArcher {
     state: ArcherState,
     moving_cooldown: Timer,
-    shooting_cooldown: Timer,
 }
 
 impl Default for EnemyArcher {
     fn default() -> Self {
-        let mut moving_cooldown = Timer::from_seconds(1.0, TimerMode::Once);
-        moving_cooldown.set_elapsed(Duration::from_secs_f32(1.0));
-        let mut shooting_cooldown = Timer::from_seconds(SHOOT_COOLDOWN, TimerMode::Once);
-        shooting_cooldown.set_elapsed(Duration::from_secs_f32(SHOOT_COOLDOWN));
+        let mut moving_cooldown = Timer::from_seconds(MOVING_COOLDOWN, TimerMode::Once);
+        moving_cooldown.set_elapsed(Duration::from_secs_f32(MOVING_COOLDOWN));
         Self {
             state: ArcherState::default(),
             moving_cooldown,
-            shooting_cooldown,
         }
     }
 }
@@ -81,6 +78,5 @@ fn update_animations(
 fn tick_cooldowns(time: Res<Time>, mut q_archers: Query<&mut EnemyArcher>) {
     for mut archer in &mut q_archers {
         archer.moving_cooldown.tick(time.delta());
-        archer.shooting_cooldown.tick(time.delta());
     }
 }
