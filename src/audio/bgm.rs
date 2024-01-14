@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
 
@@ -38,49 +36,15 @@ fn play_bgm(
     commands.spawn(Bgm { handle });
 }
 
-fn mute_bgms(
-    mut commands: Commands,
-    mut audio_instances: ResMut<Assets<AudioInstance>>,
-    q_bgms: Query<&Bgm>,
-) {
-    for bgm in &q_bgms {
-        if let Some(instance) = audio_instances.get_mut(bgm.handle.clone()) {
-            commands.spawn(UnmuteTimer::default());
-            instance.set_volume(
-                0.0,
-                AudioTween::new(Duration::from_secs_f32(0.5), AudioEasing::Linear),
-            );
-        }
-    }
-}
-
-fn unmute_bgms(
-    mut commands: Commands,
-    time: Res<Time>,
+fn update_bgm_volumes(
     game_audio: Res<GameAudio>,
     mut audio_instances: ResMut<Assets<AudioInstance>>,
-    mut q_unmute_timers: Query<(Entity, &mut UnmuteTimer)>,
     q_bgms: Query<&Bgm>,
 ) {
-    let mut unmute = false;
-    for (entity, mut unmute_timer) in &mut q_unmute_timers {
-        unmute_timer.tick(time.delta());
-        if unmute_timer.just_finished() {
-            unmute = true;
-            commands.entity(entity).despawn_recursive();
-        }
-    }
-
-    if !unmute {
-        return;
-    }
-
+    let volume = game_audio.main_volume * BGM_VOLUME;
     for bgm in &q_bgms {
         if let Some(instance) = audio_instances.get_mut(bgm.handle.clone()) {
-            instance.set_volume(
-                game_audio.main_volume * BGM_VOLUME,
-                AudioTween::new(Duration::from_secs_f32(5.0), AudioEasing::InPowi(2)),
-            );
+            instance.set_volume(volume, AudioTween::default());
         }
     }
 }
@@ -89,6 +53,7 @@ pub struct BgmPlugin;
 
 impl Plugin for BgmPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnExit(GameState::AssetLoading), play_bgm);
+        app.add_systems(OnExit(GameState::AssetLoading), play_bgm)
+            .add_systems(Update, (update_bgm_volumes,));
     }
 }

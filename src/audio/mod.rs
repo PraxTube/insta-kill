@@ -1,19 +1,21 @@
 mod bgm;
+mod sound;
 
-use rand::{thread_rng, Rng};
+pub use sound::PlaySound;
 
-use bevy::{prelude::*, utils::HashSet};
-use bevy_kira_audio::prelude::{AudioPlugin, AudioSource, *};
+use bevy::prelude::*;
+use bevy_kira_audio::prelude::AudioPlugin;
+
+use crate::player::input::PlayerInput;
+
+const MAIN_VOLUME_DELTA: f64 = 0.05;
 
 pub struct GameAudioPlugin;
 
 impl Plugin for GameAudioPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(AudioPlugin)
-            .add_plugins((bgm::BgmPlugin,))
-            .add_event::<PlaySound>()
-            .init_resource::<GameAudio>()
-            .add_systems(Update, (play_sounds,));
+        app.add_plugins((AudioPlugin, bgm::BgmPlugin, sound::GameSoundPlugin))
+            .add_systems(Update, (update_main_volume,));
     }
 }
 
@@ -28,85 +30,16 @@ impl Default for GameAudio {
     }
 }
 
-#[derive(Event)]
-pub struct PlaySound {
-    pub clip: Handle<AudioSource>,
-    pub volume: f64,
-    pub playback_rate: f64,
-    pub rand_speed_intensity: f64,
-    pub repeat: bool,
-    pub reverse: bool,
-    pub parent: Option<Entity>,
-}
-
-impl Default for PlaySound {
-    fn default() -> Self {
-        Self {
-            clip: Handle::default(),
-            volume: 1.0,
-            playback_rate: 1.0,
-            rand_speed_intensity: 0.0,
-            repeat: false,
-            reverse: false,
-            parent: None,
-        }
+impl GameAudio {
+    pub fn update(&mut self, x: f64) {
+        self.main_volume = (self.main_volume + x).clamp(0.0, 1.0);
     }
 }
 
-fn play_sounds(
-    mut commands: Commands,
-    audio: Res<Audio>,
-    game_audio: Res<GameAudio>,
-    mut ev_play_sound: EventReader<PlaySound>,
-) {
-    let mut rng = thread_rng();
-    let mut added_sounds: HashSet<Handle<AudioSource>> = HashSet::new();
-
-    for ev in ev_play_sound.read() {
-        if added_sounds.contains(&ev.clip) {
-            continue;
-        }
-        added_sounds.insert(ev.clip.clone());
-
-        let speed_offset = if ev.rand_speed_intensity == 0.0 {
-            0.0
-        } else {
-            rng.gen_range(-1.0..1.0) * ev.rand_speed_intensity
-        };
-        let volume_offset = if ev.parent.is_some() { 0.0 } else { 1.0 };
-
-        let mut audio_command = audio.play(ev.clip.clone());
-        audio_command
-            .with_volume(ev.volume * volume_offset * game_audio.main_volume)
-            .with_playback_rate(ev.playback_rate + speed_offset);
-
-        if ev.repeat {
-            audio_command.looped();
-        }
-        if ev.reverse {
-            audio_command.reverse();
-        }
-
-        let audio_instance = audio_command.handle();
-
-        if let Some(parent) = ev.parent {
-            let audio_emitter = commands
-                .spawn((
-                    TransformBundle::default(),
-                    AudioEmitter {
-                        instances: vec![audio_instance],
-                    },
-                ))
-                .id();
-
-            match commands.get_entity(parent) {
-                Some(mut r) => {
-                    r.push_children(&[audio_emitter]);
-                }
-                None => {
-                    warn!("audio parent does not exist");
-                }
-            };
-        };
+fn update_main_volume(player_input: Res<PlayerInput>, mut game_audio: ResMut<GameAudio>) {
+    if player_input.scroll == 0.0 {
+        return;
     }
+
+    game_audio.update(-player_input.scroll as f64 * MAIN_VOLUME_DELTA);
 }

@@ -67,7 +67,7 @@ fn zoom_camera(
         Err(_) => return,
     };
 
-    projection.scale = (projection.scale + player_input.zoom).clamp(1.0, 10.0);
+    projection.scale = (projection.scale + player_input.scroll).clamp(1.0, 10.0);
 }
 
 #[cfg(not(target_arch = "wasm32"))]

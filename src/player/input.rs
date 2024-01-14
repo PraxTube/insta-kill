@@ -15,7 +15,7 @@ pub struct PlayerInput {
     pub attack: bool,
     pub dash: bool,
     pub hook: bool,
-    pub zoom: f32,
+    pub scroll: f32,
     pub escape: bool,
     pub toggle_fullscreen: bool,
     pub restart: bool,
@@ -69,21 +69,7 @@ fn fetch_scroll_events(
                 }
             }
         };
-        player_input.zoom = scroll;
-    }
-}
-
-fn zoom_camera(keys: Res<Input<KeyCode>>, mut player_input: ResMut<PlayerInput>) {
-    let mut zoom = 0.0;
-    if keys.just_pressed(KeyCode::Plus) {
-        zoom -= 1.0;
-    }
-    if keys.just_pressed(KeyCode::Minus) {
-        zoom += 1.0;
-    }
-
-    if zoom != 0.0 {
-        player_input.zoom = zoom;
+        player_input.scroll = scroll;
     }
 }
 
@@ -160,7 +146,6 @@ impl Plugin for InputPlugin {
             (
                 fetch_scroll_events,
                 fetch_mouse_world_coords,
-                zoom_camera,
                 player_movement,
                 attack,
                 dash,
