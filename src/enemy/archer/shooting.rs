@@ -7,7 +7,7 @@ use crate::{
     GameAssets, GameState,
 };
 
-use super::{ArcherState, EnemyArcher, SHOOT_RANGE};
+use super::{update_animations, ArcherState, EnemyArcher, SHOOT_RANGE};
 
 const PROJECTILE_SPEED: f32 = 500.0;
 const OFFSET: f32 = 50.0;
@@ -103,7 +103,11 @@ impl Plugin for EnemyArcherShootingPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (trigger_shooting, spawn_projectiles, move_projectiles)
+            (
+                spawn_projectiles.before(trigger_shooting),
+                trigger_shooting.before(update_animations),
+                move_projectiles,
+            )
                 .run_if(in_state(GameState::Gaming)),
         );
     }
