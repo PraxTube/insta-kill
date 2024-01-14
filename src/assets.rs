@@ -76,8 +76,12 @@ pub struct GameAssets {
     )]
     pub enemy_archer_animations: Vec<Handle<AnimationClip2D>>,
 
+    #[asset(texture_atlas(tile_size_x = 80.0, tile_size_y = 16.0, columns = 1, rows = 3))]
     #[asset(path = "enemy/archer/projectile.png")]
-    pub archer_projectile: Handle<Image>,
+    pub archer_projectile: Handle<TextureAtlas>,
+    #[asset(paths("enemy/archer/projectile.trickfilm#main",), collection(typed))]
+    pub archer_projectile_animations: Vec<Handle<AnimationClip2D>>,
+
     #[asset(path = "enemy/archer/archer_shadow.png")]
     pub enemy_archer_shadow: Handle<Image>,
 

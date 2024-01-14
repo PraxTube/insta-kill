@@ -38,6 +38,7 @@ fn spawn_bar(mut commands: Commands, assets: Res<GameAssets>) {
                     position_type: PositionType::Absolute,
                     ..default()
                 },
+                visibility: Visibility::Hidden,
                 z_index: ZIndex::Local(101),
                 ..default()
             },
