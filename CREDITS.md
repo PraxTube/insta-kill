@@ -56,7 +56,7 @@ https://grappe.itch.io/medal
 
 ### Music
 
-https://shononoki.itch.io/rpg-music-pack-svl
+https://shononoki.itch.io/bullet-hell-music-pack
 
 ---
 

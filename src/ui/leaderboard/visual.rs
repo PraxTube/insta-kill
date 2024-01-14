@@ -74,7 +74,7 @@ fn spawn_score_row(
 }
 
 fn spawn_restart_text(commands: &mut Commands, font: Handle<Font>) -> Entity {
-    let text = "ESP OR R TO RESTART";
+    let text = "ESC OR R TO RESTART";
     let text_style = TextStyle {
         font,
         font_size: FONT_SIZE,

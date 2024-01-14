@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy_ecs_ldtk::prelude::LdtkProject;
-// use bevy_kira_audio::AudioSource;
+use bevy_kira_audio::AudioSource;
 use bevy_trickfilm::prelude::*;
 
 #[derive(AssetCollection, Resource)]
@@ -104,6 +104,10 @@ pub struct GameAssets {
 
     #[asset(path = "ui/score_icon.png")]
     pub score_icon: Handle<Image>,
+
+    // --- MUSIC ---
+    #[asset(path = "music/bgm.ogg")]
+    pub bgm: Handle<AudioSource>,
 
     // --- FONT ---
     #[asset(path = "fonts/PressStart2P.ttf")]

@@ -1,6 +1,7 @@
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
 mod assets;
+mod audio;
 mod effect;
 mod enemy;
 mod player;
@@ -63,6 +64,7 @@ fn main() {
             LoadingStateConfig::new(GameState::AssetLoading).load_collection::<GameAssets>(),
         )
         .add_plugins((
+            audio::GameAudioPlugin,
             world::WorldPlugin,
             ui::UiPlugin,
             effect::EffectPlugin,
