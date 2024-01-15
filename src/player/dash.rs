@@ -19,17 +19,44 @@ use super::{
 };
 
 const DASH_LANDING_OFFSET: Vec3 = Vec3::new(0.0, -50.0, 0.0);
+const DASH_COOLDOWN: f32 = 2.5;
+
+#[derive(Resource, Deref, DerefMut)]
+struct DashTimer(Timer);
 
 #[derive(Component)]
 pub struct DashLanding;
 #[derive(Component)]
 pub struct DashLandingCollider;
 
-fn trigger_dash(player_input: Res<PlayerInput>, mut q_player: Query<&mut Player>) {
+#[derive(Component)]
+struct DashRefresh {
+    timer: Timer,
+}
+
+impl Default for DashRefresh {
+    fn default() -> Self {
+        Self {
+            timer: Timer::from_seconds(0.35, TimerMode::Once),
+        }
+    }
+}
+
+fn trigger_dash(
+    time: Res<Time>,
+    mut dash_timer: ResMut<DashTimer>,
+    player_input: Res<PlayerInput>,
+    mut q_player: Query<&mut Player>,
+) {
     let mut player = match q_player.get_single_mut() {
         Ok(r) => r,
         Err(_) => return,
     };
+
+    dash_timer.tick(time.delta());
+    if !dash_timer.finished() {
+        return;
+    }
 
     if player.state == PlayerState::Dashing {
         return;
@@ -37,6 +64,7 @@ fn trigger_dash(player_input: Res<PlayerInput>, mut q_player: Query<&mut Player>
 
     if player_input.dash {
         player.state = PlayerState::Dashing;
+        dash_timer.reset();
     }
 }
 
@@ -209,6 +237,62 @@ fn despawn_dash_landings(
     }
 }
 
+fn spawn_dash_refreshs(
+    mut commands: Commands,
+    assets: Res<GameAssets>,
+    dash_timer: Res<DashTimer>,
+    q_player: Query<Entity, With<Player>>,
+) {
+    if !dash_timer.just_finished() {
+        return;
+    }
+
+    let player_entity = match q_player.get_single() {
+        Ok(r) => r,
+        Err(_) => return,
+    };
+
+    let refresh = commands
+        .spawn((
+            DashRefresh::default(),
+            SpriteBundle {
+                texture: assets.player_dash_refresh.clone(),
+                transform: Transform::from_translation(Vec2::ZERO.extend(1.0)),
+                ..default()
+            },
+        ))
+        .id();
+
+    commands.entity(player_entity).push_children(&[refresh]);
+}
+
+fn despawn_dash_refreshs(
+    mut commands: Commands,
+    time: Res<Time>,
+    q_player: Query<&Player>,
+    mut q_refreshs: Query<(Entity, &mut DashRefresh)>,
+) {
+    let player = match q_player.get_single() {
+        Ok(r) => r,
+        Err(_) => return,
+    };
+
+    for (entity, mut refresh) in &mut q_refreshs {
+        refresh.timer.tick(time.delta());
+        if refresh.timer.just_finished() || player.state == PlayerState::Dashing {
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
+fn animate_dash_refresh(mut q_refreshs: Query<(&mut Transform, &mut Sprite, &DashRefresh)>) {
+    for (mut transform, mut sprite, refresh) in &mut q_refreshs {
+        let ratio = refresh.timer.elapsed_secs() / refresh.timer.duration().as_secs_f32();
+        transform.scale = Vec3::ONE.lerp(Vec3::splat(1.5), ratio);
+        sprite.color = Color::from(Vec4::ONE.lerp(Vec3::ONE.extend(0.0), ratio));
+    }
+}
+
 pub struct PlayerDashPlugin;
 
 impl Plugin for PlayerDashPlugin {
@@ -223,9 +307,16 @@ impl Plugin for PlayerDashPlugin {
                 reset_dash_rotation,
                 spawn_dash_landings,
                 despawn_dash_landings,
+                spawn_dash_refreshs,
+                despawn_dash_refreshs,
+                animate_dash_refresh,
             )
                 .chain()
                 .run_if(in_state(GameState::Gaming)),
-        );
+        )
+        .insert_resource(DashTimer(Timer::from_seconds(
+            DASH_COOLDOWN,
+            TimerMode::Once,
+        )));
     }
 }

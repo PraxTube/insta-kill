@@ -46,6 +46,9 @@ pub struct GameAssets {
     )]
     pub player_reflection_projectile_animations: Vec<Handle<AnimationClip2D>>,
 
+    #[asset(path = "player/dash_refresh.png")]
+    pub player_dash_refresh: Handle<Image>,
+
     // --- ENEMY ---
     #[asset(texture_atlas(tile_size_x = 34.0, tile_size_y = 34.0, columns = 7, rows = 1))]
     #[asset(path = "enemy/enemy_hit.png")]
