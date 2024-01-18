@@ -297,6 +297,9 @@ pub struct PlayerDashPlugin;
 
 impl Plugin for PlayerDashPlugin {
     fn build(&self, app: &mut App) {
+        let mut dash_timer = Timer::from_seconds(DASH_COOLDOWN, TimerMode::Once);
+        dash_timer.set_elapsed(dash_timer.duration());
+
         app.add_systems(
             Update,
             (
@@ -314,9 +317,6 @@ impl Plugin for PlayerDashPlugin {
                 .chain()
                 .run_if(in_state(GameState::Gaming)),
         )
-        .insert_resource(DashTimer(Timer::from_seconds(
-            DASH_COOLDOWN,
-            TimerMode::Once,
-        )));
+        .insert_resource(DashTimer(dash_timer));
     }
 }
