@@ -6,6 +6,7 @@ mod leaderboard;
 mod main_volume_bar;
 mod score;
 mod text_field;
+mod vignette;
 
 use bevy::prelude::*;
 
@@ -21,6 +22,7 @@ impl Plugin for UiPlugin {
             leaderboard::LeaderboardPlugin,
             text_field::TextFieldPlugin,
             main_volume_bar::MainVolumeBarPlugin,
+            vignette::VignettePlugin,
         ));
     }
 }
