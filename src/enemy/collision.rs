@@ -11,7 +11,7 @@ use crate::{
     utils::FixedRotation,
 };
 
-use super::{Enemy, EnemyProjectile};
+use super::{Enemy, EnemyProjectile, DASH_SCORE_MULTIPLIYER, REFLECTION_PROJECTILE_SCORE_ADDITION};
 
 fn player_strike_collisions(
     q_strikes: Query<&Strike>,
@@ -51,7 +51,6 @@ fn player_strike_collisions(
         };
 
         enemy.disabled = true;
-        enemy.score = 100;
     }
 }
 
@@ -105,9 +104,16 @@ fn projectile_strike_collisions(
 }
 
 fn player_reflection_projectiles_collisions(
-    q_projectiles: Query<&ReflectionProjectile>,
+    mut q_projectiles: Query<&mut ReflectionProjectile>,
     mut q_enemies: Query<&mut Enemy>,
-    q_colliders: Query<&Parent, (With<Collider>, Without<Enemy>, Without<DashLanding>)>,
+    q_colliders: Query<
+        &Parent,
+        (
+            With<Collider>,
+            Without<Enemy>,
+            Without<ReflectionProjectile>,
+        ),
+    >,
     mut ev_collision_events: EventReader<CollisionEvent>,
 ) {
     for ev in ev_collision_events.read() {
@@ -133,16 +139,17 @@ fn player_reflection_projectiles_collisions(
             continue;
         };
 
-        let _ = if let Ok(r) = q_projectiles.get(source_parent) {
+        let mut projectile = if let Ok(r) = q_projectiles.get_mut(source_parent) {
             r
-        } else if let Ok(r) = q_projectiles.get(target_parent) {
+        } else if let Ok(r) = q_projectiles.get_mut(target_parent) {
             r
         } else {
             continue;
         };
 
+        projectile.increase_counter();
         enemy.disabled = true;
-        enemy.score = 200;
+        enemy.score += REFLECTION_PROJECTILE_SCORE_ADDITION * projectile.enemy_counter();
     }
 }
 
@@ -191,7 +198,7 @@ fn player_dash_collisions(
         };
 
         enemy.disabled = true;
-        enemy.score = 50;
+        enemy.score = (enemy.score as f32 * DASH_SCORE_MULTIPLIYER) as u32;
     }
 }
 
@@ -233,7 +240,7 @@ fn player_dash_landing_collisions(
         };
 
         enemy.disabled = true;
-        enemy.score = 25;
+        enemy.score = (enemy.score as f32 * DASH_SCORE_MULTIPLIYER) as u32;
     }
 }
 

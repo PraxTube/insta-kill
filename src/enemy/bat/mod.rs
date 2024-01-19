@@ -3,6 +3,7 @@ mod spawn;
 
 use bevy::prelude::*;
 
+const SCORE: u32 = 100;
 const MOVE_SPEED: f32 = 120.0;
 
 pub use super::Enemy;

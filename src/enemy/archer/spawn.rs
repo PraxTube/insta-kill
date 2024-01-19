@@ -11,7 +11,7 @@ use crate::{
     GameAssets, GameState,
 };
 
-use super::{ArcherState, Enemy, EnemyArcher};
+use super::{ArcherState, Enemy, EnemyArcher, SCORE};
 
 #[derive(Resource)]
 struct EnemySpawnCooldown {
@@ -68,7 +68,10 @@ fn spawn_enemies(
 
     commands
         .spawn((
-            Enemy::default(),
+            Enemy {
+                score: SCORE,
+                ..default()
+            },
             EnemyArcher::default(),
             YSort(0.0),
             animator,

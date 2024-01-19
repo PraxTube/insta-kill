@@ -9,6 +9,7 @@ use bevy_trickfilm::prelude::*;
 
 use crate::{GameAssets, GameState};
 
+const SCORE: u32 = 200;
 const MOVE_SPEED: f32 = 80.0;
 const SHOOT_RANGE: f32 = 500.0;
 /// How long should the archer idle after shooting before moving again

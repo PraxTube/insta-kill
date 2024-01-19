@@ -9,12 +9,23 @@ const PROJECTILE_SPEED: f32 = 800.0;
 #[derive(Component, Default)]
 pub struct ReflectionProjectile {
     disabled: bool,
+    enemy_counter: u32,
 }
 
 #[derive(Event)]
 pub struct SpawnReflectionProjectile {
     pub pos: Vec2,
     pub dir: Vec2,
+}
+
+impl ReflectionProjectile {
+    pub fn enemy_counter(&self) -> u32 {
+        self.enemy_counter
+    }
+
+    pub fn increase_counter(&mut self) {
+        self.enemy_counter += 1;
+    }
 }
 
 fn spawn_reflection_projectiles(

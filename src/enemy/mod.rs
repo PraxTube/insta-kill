@@ -6,6 +6,9 @@ mod spawn;
 
 use bevy::prelude::*;
 
+const REFLECTION_PROJECTILE_SCORE_ADDITION: u32 = 100;
+const DASH_SCORE_MULTIPLIYER: f32 = 0.35;
+
 pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {

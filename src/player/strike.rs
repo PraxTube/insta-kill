@@ -17,7 +17,7 @@ use super::{
 
 const OFFSET: Vec3 = Vec3::new(0.0, -10.0, 0.0);
 const CHAIN_COOLDOWN: f32 = 0.35;
-const STRIKE_COOLDOWN: f32 = 0.2;
+const STRIKE_COOLDOWN: f32 = 0.4;
 const STRIKE_CHAIN_COUNT: usize = 3;
 
 #[derive(Resource, Default)]
@@ -64,10 +64,10 @@ fn spawn_strikes(
         animator.play(assets.player_strike_animations[0].clone());
 
         let flip_y = ev.strike_index % 2 == 1;
-        let scale = if ev.strike_index == STRIKE_CHAIN_COUNT - 1 {
-            Vec3::splat(2.0)
+        let (scale, color) = if ev.strike_index == STRIKE_CHAIN_COUNT - 1 {
+            (Vec3::splat(2.0), Color::rgb(0.8, 0.8, 0.8))
         } else {
-            Vec3::splat(1.5)
+            (Vec3::splat(1.5), Color::WHITE)
         };
 
         let collider = commands
@@ -96,6 +96,7 @@ fn spawn_strikes(
                     texture_atlas: assets.player_strike.clone(),
                     sprite: TextureAtlasSprite {
                         flip_y,
+                        color,
                         ..default()
                     },
                     ..default()

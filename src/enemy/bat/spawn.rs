@@ -10,7 +10,7 @@ use crate::{
     enemy::spawn::SPAWN_OFFSET, player::Player, world::camera::YSort, GameAssets, GameState,
 };
 
-use super::{Enemy, EnemyBat};
+use super::{Enemy, EnemyBat, SCORE};
 
 #[derive(Resource)]
 struct EnemySpawnCooldown {
@@ -64,7 +64,10 @@ fn spawn_enemies(
 
     commands
         .spawn((
-            Enemy::default(),
+            Enemy {
+                score: SCORE,
+                ..default()
+            },
             EnemyBat,
             YSort(0.0),
             animator,
