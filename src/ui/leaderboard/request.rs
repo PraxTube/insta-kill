@@ -101,7 +101,7 @@ fn send_get_request(
     }
     ev_data_posted.clear();
 
-    let req = reqwest.0.post(GET_URL).build().unwrap();
+    let req = reqwest.0.get(GET_URL).build().unwrap();
     let req = ReqwestRequest::new(req);
     commands.spawn((req, GetRequest));
 }
