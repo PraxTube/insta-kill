@@ -1,6 +1,7 @@
 use chrono::Utc;
 
 use bevy::prelude::*;
+use bevy_rapier2d::plugin::RapierTransformPropagateSet;
 use noisy_bevy::simplex_noise_2d_seeded;
 
 use super::MainCamera;
@@ -79,6 +80,9 @@ impl Plugin for CameraShakePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, (decay_shake_trauma,))
             .init_resource::<CameraShake>()
-            .add_systems(PostUpdate, update_camera);
+            .add_systems(
+                PostUpdate,
+                update_camera.before(RapierTransformPropagateSet),
+            );
     }
 }
