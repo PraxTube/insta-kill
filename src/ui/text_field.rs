@@ -104,10 +104,6 @@ pub fn spawn_text_field(commands: &mut Commands, font: Handle<Font>) -> Entity {
                     align_items: AlignItems::Center,
                     width: Val::Px((2.0 * CHAR_SIZE + CHAR_OFFSET) * CHAR_PIXEL_FACTOR),
                     height: Val::Px(42.0),
-                    margin: UiRect {
-                        top: Val::Px(75.0),
-                        ..default()
-                    },
                     ..default()
                 },
                 background_color: TRANSPARENT_BACKGROUND.into(),
