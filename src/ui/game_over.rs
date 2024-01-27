@@ -65,6 +65,26 @@ fn spawn_player_score(commands: &mut Commands, font: Handle<Font>, score: u32) -
     commands.spawn(text_bundle).id()
 }
 
+fn spawn_prompt(commands: &mut Commands, font: Handle<Font>) -> Entity {
+    let text = format!("ENTER NAME:");
+    let text_style = TextStyle {
+        font,
+        font_size: 30.0,
+        color: Color::WHITE,
+    };
+    let text_bundle = TextBundle::from_sections([TextSection::new(text, text_style.clone())]);
+    commands
+        .spawn(text_bundle)
+        .insert(Style {
+            margin: UiRect {
+                top: Val::Px(75.0),
+                ..default()
+            },
+            ..default()
+        })
+        .id()
+}
+
 fn spawn_restart_text(commands: &mut Commands, font: Handle<Font>) -> Entity {
     let text = "ESC to skip and restart".to_string();
     let text_style = TextStyle {
@@ -88,6 +108,7 @@ fn spawn_restart_text(commands: &mut Commands, font: Handle<Font>) -> Entity {
 fn spawn_text(commands: &mut Commands, font: Handle<Font>, score: u32) {
     let title_text = spawn_title(commands, font.clone());
     let score_text = spawn_player_score(commands, font.clone(), score);
+    let prompt_text = spawn_prompt(commands, font.clone());
     let input_field = spawn_text_field(commands, font.clone());
     let restart_text = spawn_restart_text(commands, font.clone());
 
@@ -96,7 +117,7 @@ fn spawn_text(commands: &mut Commands, font: Handle<Font>, score: u32) {
             GameOverScreen,
             NodeBundle {
                 style: Style {
-                    top: Val::Percent(25.0),
+                    top: Val::Percent(15.0),
                     width: Val::Percent(100.0),
                     flex_direction: FlexDirection::Column,
                     row_gap: Val::Vh(3.0),
@@ -108,7 +129,13 @@ fn spawn_text(commands: &mut Commands, font: Handle<Font>, score: u32) {
                 ..default()
             },
         ))
-        .push_children(&[title_text, score_text, input_field, restart_text]);
+        .push_children(&[
+            title_text,
+            score_text,
+            prompt_text,
+            input_field,
+            restart_text,
+        ]);
 }
 
 fn spawn_game_over_screen(
