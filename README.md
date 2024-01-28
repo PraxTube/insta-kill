@@ -7,6 +7,10 @@ You can play the game [in your web browser over on itch](https://praxtube.itch.i
     <img src="docs/demo/screenshot.jpg" alt="screenshot" />
 </p>
 
+<p align="center">
+    <img src="docs/demo/showcase.gif" alt="showcase" />
+</p>
+
 ## Appendix
 
 [Online Leaderboard](https://rancic.org/games/insta-kill/)
