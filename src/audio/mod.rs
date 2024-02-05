@@ -1,7 +1,6 @@
 mod bgm;
 mod sound;
 
-#[allow(unused_imports)]
 pub use sound::PlaySound;
 
 use bevy::prelude::*;
