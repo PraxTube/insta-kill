@@ -5,6 +5,7 @@ use bevy_rapier2d::prelude::*;
 use bevy_trickfilm::prelude::*;
 
 use crate::{
+    audio::PlaySound,
     utils::{quat_from_vec2, FixedRotation},
     world::camera::YSort,
     GameAssets, GameState,
@@ -19,6 +20,8 @@ const OFFSET: Vec3 = Vec3::new(0.0, -10.0, 0.0);
 const CHAIN_COOLDOWN: f32 = 0.35;
 const STRIKE_COOLDOWN: f32 = 0.4;
 const STRIKE_CHAIN_COUNT: usize = 3;
+const SOUND_PITCH_CHANGE: f64 = 0.1;
+const SOUND_VOLUME: f64 = 0.7;
 
 #[derive(Resource, Default)]
 struct StrikeCooldown {
@@ -120,6 +123,25 @@ fn despawn_strikes(
     }
 }
 
+fn play_strike_sound(
+    assets: Res<GameAssets>,
+    mut ev_spawn_strike: EventReader<SpawnStrike>,
+    mut ev_play_sound: EventWriter<PlaySound>,
+) {
+    for ev in ev_spawn_strike.read() {
+        // Lower playback_rate for the last (third) strike
+        let playback_rate = if ev.strike_index == 2 { 1.0 } else { 1.5 };
+
+        ev_play_sound.send(PlaySound {
+            clip: assets.strike_sound.clone(),
+            volume: SOUND_VOLUME,
+            rand_speed_intensity: SOUND_PITCH_CHANGE,
+            playback_rate,
+            ..default()
+        });
+    }
+}
+
 fn trigger_strike(
     player_input: Res<PlayerInput>,
     mouse_coords: Res<MouseWorldCoords>,
@@ -197,6 +219,7 @@ impl Plugin for PlayerStrikePlugin {
             (
                 spawn_strikes,
                 despawn_strikes,
+                play_strike_sound,
                 trigger_strike,
                 reset_chain,
                 tick_strike_cooldown,

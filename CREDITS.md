@@ -54,6 +54,14 @@ https://grappe.itch.io/medal
 
 ### Sounds
 
+#### Swing
+
+- https://freesound.org/people/Eponn/sounds/547040/
+- https://freesound.org/people/spycrah/sounds/471097/
+- https://freesound.org/people/Artninja/sounds/700220/
+
+Mixed by @TheYahton (https://github.com/PraxTube/insta-kill/issues/1)
+
 ### Music
 
 https://shononoki.itch.io/bullet-hell-music-pack
